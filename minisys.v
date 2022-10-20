@@ -286,20 +286,20 @@ module minisys (
     );
     
     wire id_ex_stall,ex_memread;
-    wire [4:0]  ex_address0;
+    wire [4:0]  ex_address;
     hazard hazard(
         .ex_MemRead     (ex_memread),
         .id_rt          (addr0),
         .id_rs          (rs),
-        .ex_rt          (ex_address0),
+        .ex_rt          (ex_address),
         .PC_IFWrite     (pcwrite),
-        .ID_EX_stall          (id_ex_stall)
+        .ID_EX_stall    (id_ex_stall)
     );
     
     wire [31:0] ex_opcplus4,ex_dataA,ex_dataB,ex_sign_extend;
     wire [1:0]  ex_aluop;
     wire        ex_alusrc;
-    wire [4:0]  ex_address1,ex_rs;
+    wire [4:0]  ex_address0,ex_address1,ex_rs;
     wire [5:0]  ex_func,ex_op;
     wire [4:0]  ex_shamt;
     wire ex_jr,ex_mem_jmp,ex_mem_jalr,ex_mem_jal;
@@ -423,7 +423,6 @@ module minisys (
         .ALUSrcB        (ex_alusrcB)
     );
     
-	wire [4:0]  ex_address;
 	wire [31:0] mem_aluresult;
     Executs32 execute(
         // new
