@@ -19,11 +19,12 @@ module minisys (
 	input           rx,                 // UART接收
 	output          tx                  // UART发送
 );
-    
-    wire cpu_clk;				        // cpu_clk: 分频后时钟供给系统
-    wire rst;
-    // UART Programmer Pinouts
-    wire upg_clk, upg_clk_o, upg_wen_o, upg_done_o;
+    // cpuclk分频器输出
+    wire cpu_clk;                       // cpu_clk: 分频后时钟供给系统
+    wire upg_clk;                       // 用于Uart的clock
+
+    // UART Programmer相关
+    wire upg_clk_o, upg_wen_o, upg_done_o;
     wire [14:0] upg_adr_o;
     wire [31:0] upg_dat_o;  
       
@@ -37,10 +38,11 @@ module minisys (
         if (fpga_rst)    upg_rst = 1;
     end
     
+    wire rst;
     assign rst = fpga_rst | !upg_rst;
 
     cpuclk cpuclk (
-        .clk_in1        (fpga_clk),     // 100MHz, 板上时钟
+        .clk_in1         (fpga_clk),    // 100MHz, 板上时钟
         .clk_out1        (cpu_clk),     // CPU Clock (22MHz), 主时钟
         .clk_out2        (upg_clk)      // UPG Clock (10MHz), 用于串口下载
     );
@@ -49,67 +51,122 @@ module minisys (
         .upg_clk_i        (upg_clk),    // 10MHz   
         .upg_rst_i        (upg_rst),    // 高电平有效
          // blkram signals
-         .upg_clk_o        (upg_clk_o),
-         .upg_wen_o        (upg_wen_o),
-         .upg_adr_o        (upg_adr_o),
-         .upg_dat_o        (upg_dat_o),
-         .upg_done_o       (upg_done_o),
+         .upg_clk_o       (upg_clk_o),
+         .upg_wen_o       (upg_wen_o),
+         .upg_adr_o       (upg_adr_o),
+         .upg_dat_o       (upg_dat_o),
+         .upg_done_o      (upg_done_o),
          // uart signals
          .upg_rx_i        (rx),
          .upg_tx_o        (tx)
     );
     
-    wire iowrite,ioread;	            // I/O读写信号
-    wire [31:0] write_data;	            // 写RAM或IO的数据
-    wire [31:0] rdata;		            // 读RAM或IO的数据
-    wire [15:0] ioread_data;	        // 读IO的数据
+    // 程序ROM单元输出
+    wire [31:0] rom_dat;                // 给取指单元的指令
     
-    // 取值单元输出
-    wire [31:0] instruction;
-    wire [31:0] opcplus4;
+    // IF段输出
+    wire [13:0] rom_adr;                // 给程序ROM单元的取指地址
+    wire [31:0] instruction;            // 取出的指令
+    wire [31:0] opcplus4;               // PC+4
     
-    wire [31:0] read_data_1;	       // 从寄存器读出的(rs)
-    wire [31:0] read_data_2;	       // 从寄存器读出的(rt)
-    wire [31:0] sign_extend;	       // 立即数符号扩展
-   
-    wire [13:0] rom_adr;
-    wire [31:0] rom_dat;
+    // IF_ID输出
+    wire [31:0] id_instruction;         
+    wire [31:0] id_opcplus4;
     
-    // 执行单元相关
-    wire alusrc;
-    wire [1:0]  aluop;
-    wire [31:0] add_result;	           // PC+4+offset<<2
-    wire [31:0] alu_result;	           // ALU运算结果
-    wire [31:0] read_data;	           // RAM中读取的数据
-    wire zero,positive,negative,overflow,div_zero;
+    // BranchTest输出
+    wire nBranch,ifBranch;              // 预测分支，检测到不分支
+    wire [31:0] if_rs;                  // 用于跳转指令，(PC)<-(rs)
+    wire JR,J,if_flush;
     
-    // 控制单元
+    // Control输出
+    wire regdst;
+    wire regwrite;
+    wire iowrite,ioread;	             // I/O读写信号
+    wire memwrite,memread,memory_sign;
+    wire [1:0]memory_data_width;
+    wire memoriotoreg;
+    wire sftmd;
     wire i_format;
     wire beq,bne,bgez,bgtz,blez,bltz,bgezal,bltzal;
     wire jmp,jal,jr,jalr;
     wire mfhi,mflo,mfc0,mthi,mtlo,mtc0;
+    wire alusrc;
+    wire [1:0] aluop;
     wire divsel;
     wire break,syscall,eret;
     wire reserved_instruction;
-    wire regdst;
-    wire regwrite;
-    wire memwrite;
-    wire memread,memory_sign;
-    wire [1:0]memory_data_width;
-    wire memoriotoreg;
-    wire memreg;
-    wire sftmd;
     
-	// ID
-	wire [31:0] id_instruction;
-	wire [31:0] id_opcplus4;
+    // idecode输出
+    wire [25:0] jump_PC;                // J型指令中的address字段
+    wire [31:0] read_data_1;            // 从寄存器读出的(rs)
+    wire [31:0] read_data_2;            // 从寄存器读出的(rt)
+    wire [31:0] write_register_data;    // 要写入寄存器的数据
+    wire [4:0] addr0,addr1,rs;          // rt,rd,rs
+    wire [31:0] sign_extend;            // 立即数符号扩展
+    
+    // hazard输出
+    wire pcwrite;                       // 解决load-use冒险
+    wire id_ex_stall;             
+          
+    // ID_EX输出
+    wire [31:0] ex_mem_opcplus4,ex_dataA,ex_dataB,ex_sign_extend;
+    wire [1:0] ex_aluop;
+    wire ex_alusrc;
+    wire [4:0] ex_address0,ex_address1,ex_rs,ex_shamt;
+    wire [5:0] ex_func,ex_op;
+    wire ex_regdst,ex_sftmd,ex_divsel,ex_i_format;
+    wire ex_jr,ex_mem_jmp,ex_mem_jalr,ex_mem_jal;
+    wire ex_memread,ex_mem_regwrite,ex_mem_memoriotoreg,ex_mem_memwrite,ex_mem_ioread,ex_mem_iowrite,ex_mem_memory_sign;
+    wire [1:0] ex_mem_memory_data_width;
+    wire ex_mem_beq,ex_mem_bne,ex_mem_bgez,ex_mem_bgtz,ex_mem_blez,ex_mem_bltz,ex_mem_bgezal,ex_mem_bltzal;
+    wire ex_mem_mfhi,ex_mem_mflo,ex_mem_mtlo,ex_mem_mthi;
+    
+    // forwarding输出
+    wire [1:0] ex_alusrcA,ex_alusrcB,alusrcC,alusrcD;
+    
+    // EX段输出
+    wire [4:0] ex_address;
+    wire [31:0] add_result;	             // PC+4+offset<<2
+    wire [31:0] alu_result;	             // ALU运算结果
+    wire zero,positive,negative,overflow,div_zero;
+	
+	// EX_MEM输出
+    wire mem_wb_zero,mem_wb_positive,mem_wb_negative;
+    wire mem_wb_jmp,mem_wb_jal,mem_wb_jr,mem_wb_jalr;
+    wire mem_wb_beq,mem_wb_bne,mem_wb_bgez,mem_wb_bgtz,mem_wb_blez,mem_wb_bltz,mem_wb_bgezal,mem_wb_bltzal;
+    wire mem_wb_regwrite,mem_wb_memoriotoreg,mem_memwrite,mem_memread,mem_ioread,mem_iowrite,mem_memory_sign;
+    wire [1:0] mem_memory_data_width;
+    wire mem_wb_mfhi,mem_wb_mflo,mem_wb_mtlo,mem_wb_mthi;
+	wire [31:0] mem_wb_opcplus4,mem_aluresult,mem_dataB;
+	wire [4:0] mem_wb_waddr;
+	
+	// memorio输出
+	wire [31:0] address;               // address to DMEM
+	
+	// DataMemory输出
+    wire [31:0] mem_data_out;	        // RAM中读取的数据
+	
+	// MEM_WB输出
+    wire [4:0] wb_waddr;
+    wire wb_regwrite,wb_memoriotoreg;
+    wire wb_mfhi,wb_mflo,wb_mtlo,wb_mthi;
+    wire wb_jal,wb_jalr,wb_bgezal,wb_bltzal,wb_negative;
+    wire [31:0] wb_opcplus4,wb_aluresult,wb_memdata;
+    
+    // WB段输出
+    wire [31:0] wb_data;
 	
 	// 接口相关
     wire ledctrl,switchctrl;
     wire tubectrl,keyboardctrl,buzzerctrl,pwmctrl;
-    wire [15:0] ioread_data_keyboard;// 键盘
-    wire [15:0] ioread_data_switch;  // 拨码开关
+    wire [15:0] ioread_data_keyboard; // 键盘
+    wire [15:0] ioread_data_switch;   // 拨码开关
+   
 
+    wire [31:0] write_data;	           // 写RAM或IO的数据
+    wire [31:0] rdata;                // 读RAM或IO的数据
+    wire [15:0] ioread_data;          // 读IO的数据
+	
 	// for multicycle
 	wire [1:0] wpc;
 	wire wir;
@@ -129,13 +186,7 @@ module minisys (
 		.upg_dat_i		(upg_dat_o),	    // UPG write data
 		.upg_done_i		(upg_done_o)	    // 1 if programming is finished
 	);
-	
-	wire [31:0]branch_PC;
-	wire [25:0]jump_PC;
-	wire if_zero,if_positive,if_negative;
-	wire if_beq,if_bne,if_bgez,if_bgtz,if_blez,if_bltz,if_bgezal,if_bltzal;
-	wire if_jmp,if_jal,if_jr,if_jalr;
-	wire pcwrite;
+
     // 取指单元
     Ifetc32 ifetch(
         //.Wpc(wpc),
@@ -143,49 +194,70 @@ module minisys (
         .reset          (rst),
         .clock          (cpu_clk),     
         .PCWrite        (pcwrite),
-        .Jrn            (jr),           // (PC)←(rs),ID段传入
-        .Jalr           (jalr),
-        .Read_data_1    (read_data_1),  // (rs)
         
-        .Jmp            (jmp),          // (PC)←((Zero-Extend) address<<2),ID段传入
-        .Jal            (jal),  
+        .Read_data_1    (if_rs),        // (rs)注意！！！
         .Jump_PC        (jump_PC),      // ((Zero-Extend) address<<2)
-        
-        .Add_result     (branch_PC),    // (PC)+4+((Sign-Extend)offset<<2),EXE_MEM后传入
-        .Beq            (if_beq),
-        .Bne            (if_bne),
-        .Bgez           (if_bgez),
-        .Bgtz           (if_bgtz),
-        .Blez           (if_blez),
-        .Bltz           (if_bltz),
-        .Bgezal         (if_bgezal),
-        .Bltzal         (if_bltzal),
-        .Zero           (if_zero),                                     
-        .Positive       (if_positive),
-        .Negative       (if_negative),  
+        .J              (J),
+        .JR             (JR),
+        .IFBranch       (ifBranch),
+        .nBranch        (nBranch),
+        .ID_opcpuls4    (id_opcplus4),
         
         .opcplus4       (opcplus4),
         .Instruction    (instruction),
 		// ROM Pinouts
 		.rom_adr_o		(rom_adr),
-		.Jpadr			(rom_dat),
+		.Jpadr			(rom_dat),   // 程序ROM输出的指令
 		//
 		.interrupt_PC   (),
         .flush          ()
     );
-     
+    
+    branchTest branchTest(
+        .IF_op          (rom_dat[31:26]), // 从而与ifetch同步
+        //有条件跳转 ID段
+        .Beq            (beq),
+        .Bne            (bne),
+        .Bgez           (bgez),
+        .Bgtz           (bgtz),
+        .Blez           (blez),
+        .Bltz           (bltz),
+        .Bgezal         (bgezal),
+        .Bltzal         (bltzal),
+        
+        .Jrn            (jr),        
+        .Jalr           (jalr),
+        .Jmp            (jmp),       
+        .Jal            (jal),  
+        
+        .ALUSrc         (alusrc),
+        .ALUSrcC        (alusrcC),
+        .ALUSrcD        (alusrcD),
+        .read_data_1    (read_data_1),//register[rs]
+        .read_data_2    (read_data_2),//register[rt]
+        .Sign_extend    (sign_extend),
+        .EX_ALU_result  (alu_result),
+        .MEM_ALU_result (mem_aluresult),  
+        .WB_data        (write_register_data),
+        
+        .nBranch        (nBranch),
+        .IFBranch       (ifBranch),
+        .J              (J),
+        .JR             (JR),
+        .IF_Flush       (if_flush),
+        .rs             (if_rs)
+    );
+    
     // IR and NPC
     IF_ID IF_ID(
        .cpu_clk         (cpu_clk),
        .reset           (rst),  
-       .PCWrite         (pcwrite),    
+       .PCWrite         (pcwrite),
+       .flush           (if_flush),
        .IF_opcplus4     (opcplus4),        
        .IF_instruction  (instruction),   
-       .ID_opcplus4      (id_opcplus4),
-       .ID_instruction  (id_instruction),
- 
-       .stall           (),              
-       .clean           ()                    
+       .ID_opcplus4     (id_opcplus4),
+       .ID_instruction  (id_instruction)        
     );
     
     //控制单元
@@ -198,7 +270,6 @@ module minisys (
         ///.Wir            (wir),
         ///.Waluresult     (waluresult),
  
-        //
         .Instruction    (id_instruction),
         .Alu_resultHigh (alu_result[31:10]),
         .RegDST         (regdst),
@@ -243,34 +314,30 @@ module minisys (
         .Eret           (eret),
         .Reserved_instruction(reserved_instruction)
     );
-    
-    wire [4:0] waddr;
-    wire [4:0] id_waddr,addr0,addr1,rs;
-    wire id_regwrite,wb_memoriotoreg;
-    wire [31:0] wb_aluresult,wb_memdata,wb_data;
+
     Idecode32 idecode(
         .clock          (cpu_clk),
         .reset          (rst),
-        .opcplus4       (id_opcplus4),
+        .opcplus4       (wb_opcplus4),
         .Instruction    (id_instruction),
-        .waddr          (id_waddr),
-        
-        .read_data_1	(read_data_1),//
-        .read_data_2	(read_data_2),//
         .wb_data        (wb_data),
-        .write_address_0(addr0),
-        .write_address_1(addr1),
+        .waddr          (wb_waddr),
+        
+        .read_data_1	(read_data_1),     // rs
+        .read_data_2	(read_data_2),     // rt
+        .write_address_0(addr0),           // rt
+        .write_address_1(addr1),           // rd
+        .write_data     (write_register_data),
         .rs             (rs),
         .Jump_PC        (jump_PC),
-        .Jal            (jal),
-        .Jalr           (jalr),
-        .Bgezal         (bgezal),
-        .Bltzal         (bltzal),
-        .RegWrite       (id_regwrite),//
+        .Jal            (wb_jal),
+        .Jalr           (wb_jalr),
+        .Bgezal         (wb_bgezal),
+        .Bltzal         (wb_bltzal),
+        .RegWrite       (wb_regwrite),
         .Sign_extend    (sign_extend),
             
-        .Positive       (positive),
-        .Negative       (negative),
+        .Negative       (wb_negative),
         .Overflow       (overflow),
         .Divide_zero    (div_zero),
         .Reserved_instruction (reserved_instruction),
@@ -285,8 +352,6 @@ module minisys (
         .causeExcCode   ()
     );
     
-    wire id_ex_stall,ex_memread;
-    wire [4:0]  ex_address;
     hazard hazard(
         .ex_MemRead     (ex_memread),
         .id_rt          (addr0),
@@ -295,19 +360,7 @@ module minisys (
         .PC_IFWrite     (pcwrite),
         .ID_EX_stall    (id_ex_stall)
     );
-    
-    wire [31:0] ex_opcplus4,ex_dataA,ex_dataB,ex_sign_extend;
-    wire [1:0]  ex_aluop;
-    wire        ex_alusrc;
-    wire [4:0]  ex_address0,ex_address1,ex_rs;
-    wire [5:0]  ex_func,ex_op;
-    wire [4:0]  ex_shamt;
-    wire ex_jr,ex_mem_jmp,ex_mem_jalr,ex_mem_jal;
-    wire ex_regdst,ex_sftmd,ex_divsel,ex_i_format,ex_mem_regwrite,ex_mem_memoriotoreg,ex_mem_memwrite,ex_mem_memory_sign;
-    wire [1:0] ex_mem_memory_data_width;
-    wire ex_mem_beq,ex_mem_bne,ex_mem_bgez,ex_mem_bgtz,ex_mem_blez,ex_mem_bltz,ex_mem_bgezal,ex_mem_bltzal;
-    wire ex_mem_mfhi,ex_mem_mflo,ex_mem_mtlo,ex_mem_mthi;
-    
+   
     // rtd,A,B,NPC,E,cmd 
     ID_EX ID_EX(
         .cpu_clk        (cpu_clk),
@@ -338,6 +391,8 @@ module minisys (
         .ID_MemIOtoReg  (memoriotoreg),
         .ID_MemWrite    (memwrite),
         .ID_MemRead     (memread),
+        .ID_IORead      (ioread),
+        .ID_IOWrite     (iowrite),
         .ID_Memory_sign (memory_sign),
         .ID_Memory_data_width(memory_data_width),
         .ID_Beq         (beq),
@@ -354,7 +409,7 @@ module minisys (
         .ID_Mthi        (mthi),
         .ID_Mtlo        (mtlo),
         
-        .EX_opcplus4    (ex_opcplus4),
+        .EX_MEM_opcplus4(ex_mem_opcplus4),
         .EX_dataA       (ex_dataA),
         .EX_dataB       (ex_dataB),
         .EX_ALUOp       (ex_aluop),
@@ -379,6 +434,8 @@ module minisys (
         .EX_MEM_MemIOtoReg(ex_mem_memoriotoreg),
         .EX_MEM_MemWrite(ex_mem_memwrite),
         .EX_MemRead     (ex_memread),
+        .EX_MEM_IORead  (ex_mem_ioread),
+        .EX_MEM_IOWrite (ex_mem_iowrite),
         .EX_MEM_Memory_sign (ex_mem_memory_sign),
         .EX_MEM_Memory_data_width(ex_mem_memory_data_width),
         
@@ -396,41 +453,49 @@ module minisys (
         .EX_MEM_Mthi    (ex_mem_mthi),
         .EX_MEM_Mtlo    (ex_mem_mtlo)
     );
-    
-    wire [1:0] ex_alusrcA,ex_alusrcB;
-    wire mem_wb_mfhi,mem_wb_mflo,mem_wb_mtlo,mem_wb_mthi;
-    wire wb_mfhi,wb_mflo,wb_mtlo,wb_mthi;
-    wire [4:0] mem_wb_waddr;
-    wire mem_wb_regwrite;
+
     forwarding forwarding(
-        .rs             (ex_rs),		    // rs
-        .rt             (ex_address0),      // rt
-        .Mflo           (ex_mem_mflo),
-        .Mfhi           (ex_mem_mfhi),
-        .ALUSrc         (ex_alusrc),     // 是否选择扩展后的立即数
+        .EX_rs          (ex_rs),		    // rs
+        .EX_rt          (ex_address0),      // rt
+        .EX_Mflo        (ex_mem_mflo),
+        .EX_Mfhi        (ex_mem_mfhi),
+        .EX_ALUSrc      (ex_alusrc),        // 是否选择扩展后的立即数
+        
+        .ID_rs          (rs),		        // ID段
+        .ID_rt          (addr0),            
+        .ID_Mflo        (mflo),
+        .ID_Mfhi        (mfhi),
+        .ID_ALUSrc      (alusrc),      
+        
+        .ID_EX_RegWrite (ex_mem_regwrite),
+        .ID_EX_waddr    (ex_address),
+        .ID_EX_Mtlo     (ex_mem_mtlo),
+        .ID_EX_Mthi     (ex_mem_mthi),  
+        
         //处理数据转发
         .EX_MEM_RegWrite(mem_wb_regwrite),
         .EX_MEM_waddr   (mem_wb_waddr),
         .EX_MEM_Mtlo    (mem_wb_mtlo),
         .EX_MEM_Mthi    (mem_wb_mthi),
          
-        .MEM_WB_RegWrite(id_regwrite),
-        .MEM_WB_waddr   (id_waddr),
+        .MEM_WB_RegWrite(wb_regwrite),
+        .MEM_WB_waddr   (wb_waddr),
         .MEM_WB_Mtlo    (wb_mtlo),
         .MEM_WB_Mthi    (wb_mthi),
     
         .ALUSrcA        (ex_alusrcA),       
-        .ALUSrcB        (ex_alusrcB)
+        .ALUSrcB        (ex_alusrcB),
+        .ALUSrcC        (alusrcC),
+        .ALUSrcD        (alusrcD)
     );
-    
-	wire [31:0] mem_aluresult;
+
     Executs32 execute(
         // new
         .clock          (cpu_clk),
         .reset          (rst),
         //.Waluresult     (waluresult),
         
-        .PC_plus_4      (ex_opcplus4),
+        .PC_plus_4      (wb_opcplus4),
         .Read_data_1	(ex_dataA),
         .Read_data_2	(ex_dataB),
         .address0       (ex_address0),
@@ -444,7 +509,7 @@ module minisys (
         .ALUSrcA        (ex_alusrcA),
         .ALUSrcB        (ex_alusrcB),
         .EX_MEM_ALU_result(mem_aluresult),
-        .WB_data        (wb_data), 
+        .WB_data        (write_register_data), 
         .I_format       (ex_i_format),
         .Sftmd          (ex_sftmd),
         .DivSel         (ex_divsel),
@@ -460,12 +525,6 @@ module minisys (
         .Add_Result     (add_result)
 	);
 	
-
-	wire [31:0] mem_data_in;
-	wire mem_memwrite,mem_memory_sign;
-	wire [1:0] mem_memory_data_width;
-	
-	wire mem_wb_memoriotoreg;
     // rtd,T,B,C,cmd 
     EX_MEM EX_MEM(
         .reset          (rst),
@@ -475,10 +534,10 @@ module minisys (
         .EX_Positive    (positive),
         .EX_Negative    (negative),
         
-        //.EX_Jr          (ex_jr),
-        //.ID_EX_Jalr     (ex_mem_jalr),
-        //.ID_EX_Jmp      (ex_mem_jmp),
-        //.ID_EX_Jal      (ex_mem_jal),
+        .EX_Jr          (ex_jr),
+        .ID_EX_Jalr     (ex_mem_jalr),
+        .ID_EX_Jmp      (ex_mem_jmp),
+        .ID_EX_Jal      (ex_mem_jal),
         
         .ID_EX_Beq      (ex_mem_beq),
         .ID_EX_Bne      (ex_mem_bne),
@@ -497,69 +556,78 @@ module minisys (
         .ID_EX_RegWrite (ex_mem_regwrite),
         .ID_EX_MemIOtoReg(ex_mem_memoriotoreg),
         .ID_EX_MemWrite (ex_mem_memwrite),
+        .ID_EX_MemRead  (ex_memread),
+        .ID_EX_IORead   (ex_mem_ioread),
+        .ID_EX_IOWrite  (ex_mem_iowrite),
         .ID_EX_Memory_sign(ex_mem_memory_sign),
         .ID_EX_Memory_data_width(ex_mem_memory_data_width),
+        .ID_EX_opcplus4 (ex_mem_opcplus4),
         
         .EX_Add_Result  (add_result),    
         .EX_ALU_Result  (alu_result),   
         .EX_Read_data_2 (ex_dataB),   
         .EX_Wirte_Address(ex_address),
 
-        .IF_Zero        (if_zero),
-        .IF_Negative    (if_negative),
-        .IF_Positive    (if_positive),
-        //.IF_Jr          (if_jr),
-        //.IF_Jalr        (if_jalr),
-        //.IF_Jmp         (if_jmp),
-        //.IF_Jal         (if_jal),
+        .MEM_WB_Zero    (mem_wb_zero),
+        .MEM_WB_Negative(mem_wb_negative),
+        .MEM_WB_Positive(mem_wb_positive),
+        .MEM_WB_Jr      (mem_wb_jr),
+        .MEM_WB_Jalr    (mem_wb_jalr),
+        .MEM_WB_Jmp     (mem_wb_jmp),
+        .MEM_WB_Jal     (mem_wb_jal),
         
-        .IF_Beq         (if_beq),
-        .IF_Bne         (if_bne),
-        .IF_Bgez        (if_bgez),
-        .IF_Bgtz        (if_bgtz),
-        .IF_Blez        (if_blez),
-        .IF_Bltz        (if_bltz),
-        .IF_Bgezal      (if_bgezal),
-        .IF_Bltzal      (if_bltzal),
+        .MEM_WB_Beq     (mem_wb_beq),
+        .MEM_WB_Bne     (mem_wb_bne),
+        .MEM_WB_Bgez    (mem_wb_bgez),
+        .MEM_WB_Bgtz    (mem_wb_bgtz),
+        .MEM_WB_Blez    (mem_wb_blez),
+        .MEM_WB_Bltz    (mem_wb_bltz),
+        .MEM_WB_Bgezal  (mem_wb_bgezal),
+        .MEM_WB_Bltzal  (mem_wb_bltzal),
         
         .MEM_MemWrite   (mem_memwrite),
-        .MEM_Memory_sign (mem_memory_sign),
+        .MEM_MemRead    (mem_memread),
+        .MEM_IORead     (mem_ioread),
+        .MEM_IOWrite    (mem_iowrite),
+        .MEM_Memory_sign(mem_memory_sign),
         .MEM_Memory_data_width(mem_memory_data_width),
+        .MEM_WB_opcplus4(mem_wb_opcplus4),
         
-        .MEM_WB_Mfhi     (mem_wb_mfhi),
-        .MEM_WB_Mflo     (mem_wb_mflo),
-        .MEM_WB_Mthi     (mem_wb_mthi),
-        .MEM_WB_Mtlo     (mem_wb_mtlo),
+        .MEM_WB_Mfhi    (mem_wb_mfhi),
+        .MEM_WB_Mflo    (mem_wb_mflo),
+        .MEM_WB_Mthi    (mem_wb_mthi),
+        .MEM_WB_Mtlo    (mem_wb_mtlo),
         
         .MEM_WB_RegWrite(mem_wb_regwrite),
         .MEM_WB_MemIOtoReg(mem_wb_memoriotoreg),
-        .IF_Branch_PC     (branch_PC),
+        //.IF_Branch_PC   (branch_PC),
         .MEM_ALU_Result (mem_aluresult),
-        .MEM_Data_In    (mem_data_in),
+        .MEM_Data_In    (mem_dataB),
         .MEM_WB_Waddr   (mem_wb_waddr)
     );
-    /*
-    dmemory32 memory (
-        .ram_clk_i		(cpu_clk),
-        .ram_wen_i	    (mem_memwrite),			    // 来自控制单元
-        .ram_adr_i		(mem_aluresult[15:2]),	    // 来自memorio模块，源头是来自执行单元算出的alu_result
-        .ram_dat_i		(mem_data_in),		    // 来自译码单元的read_data2
-        .ram_dat_o		(read_data),		    // 从存储器中获得的数据
-		// UART Programmer Pinouts
-		.upg_rst_i		(upg_rst),			// UPG reset (Active High)
-		.upg_clk_i		(upg_clk_o),		// UPG clock (10MHz)
-		.upg_wen_i		(upg_wen_o & upg_adr_o[14]),	// UPG write enable
-		.upg_adr_i		(upg_adr_o[13:0]),	// UPG write address
-		.upg_dat_i		(upg_dat_o),		// UPG write data
-		.upg_done_i		(upg_done_o)		// 1 if programming is finished
-    );*/
+    
+    memorio memio(
+        .caddress       (mem_aluresult),
+        .address        (address),///////////
+        .memread        (mem_memread),
+        .memwrite       (mem_memwrite),
+        .ioread         (mem_ioread),
+        .iowrite        (mem_iowrite),
+        .mread_data     (mem_data_out),
+        .ioread_data    (ioread_data),
+        .wdata          (mem_dataB),
+        .rdata          (rdata),                // ouput,mread_data与ioread_data选其一
+        .write_data     (write_data),
+        .LEDCtrl        (ledctrl),
+        .SwitchCtrl     (switchctrl)
+    );
 
     dmemory4x8 memory (
         .ram_clk_i		(cpu_clk),
-        .ram_wen_i	    (mem_memwrite),			    // 来自控制单元
-        .ram_adr_i		(mem_aluresult[15:0]),	    // 来自memorio模块，源头是来自执行单元算出的alu_result
-        .ram_dat_i		(mem_data_in),		    // 来自译码单元的read_data2
-        .ram_dat_o		(read_data),		    // 从存储器中获得的数据
+        .ram_wen_i	    (mem_memwrite),			// 来自控制单元
+        .ram_adr_i		(address[15:0]),	    // 来自memorio模块，源头是来自执行单元算出的alu_result
+        .ram_dat_i		(write_data),		    // 来自译码单元的read_data2
+        .ram_dat_o		(mem_data_out),		    // 从存储器中获得的数据
 		.ram_dat_width  (mem_memory_data_width),
 		.ram_sign       (mem_memory_sign),
 		// UART Programmer Pinouts
@@ -576,8 +644,9 @@ module minisys (
        .clock           (cpu_clk),
        .EX_MEM_RegWrite (mem_wb_regwrite),
        .EX_MEM_MemIOtoReg(mem_wb_memoriotoreg),
+       .EX_MEM_opcplus4 (mem_wb_opcplus4),
        .MEM_ALU_Result  (mem_aluresult),  
-       .MEM_MemData     (read_data),
+       .MEM_MemData     (mem_data_out),
        .EX_MEM_waddr    (mem_wb_waddr),
        
        .EX_MEM_Mfhi     (mem_wb_mfhi),
@@ -585,7 +654,13 @@ module minisys (
        .EX_MEM_Mthi     (mem_wb_mthi),
        .EX_MEM_Mtlo     (mem_wb_mtlo),
        
-       .ID_RegWrite     (id_regwrite),
+       .EX_MEM_Jal      (mem_wb_jal),
+       .EX_MEM_Jalr     (mem_wb_jalr),
+       .EX_MEM_Bgezal   (mem_wb_bgezal),
+       .EX_MEM_Bltzal   (mem_wb_bltzal),
+       .EX_MEM_pnegative(mem_wb_negative),
+       
+       .WB_RegWrite     (wb_regwrite),
        .WB_MemIOtoReg   (wb_memoriotoreg),
        
        .WB_Mfhi         (wb_mfhi),
@@ -593,9 +668,16 @@ module minisys (
        .WB_Mthi         (wb_mthi),
        .WB_Mtlo         (wb_mtlo),
        
+       .WB_Jal          (wb_jal),
+       .WB_Jalr         (wb_jalr),
+       .WB_Bgezal       (wb_bgezal),
+       .WB_Bltzal       (wb_bltzal),
+       .WB_negative     (wb_negative),
+       
+       .WB_opcplus4     (wb_opcplus4),
        .WB_ALU_Result   (wb_aluresult),
        .WB_MemData      (wb_memdata),
-       .WB_waddr        (id_waddr)
+       .WB_waddr        (wb_waddr)
 	);
 	
 	wb wb(
@@ -622,21 +704,6 @@ module minisys (
        .data_out        ()
     );
     
-    memorio memio(
-        .caddress		(alu_result),
-        .address		(mem_aluresult),
-        .memread		(memread),
-        .memwrite		(memwrite),
-        .ioread			(ioread),
-        .iowrite		(iowrite),
-        .mread_data		(read_data),
-        .ioread_data	(ioread_data),
-        .wdata			(read_data_2),
-        .rdata			(rdata),
-        .write_data		(write_data),
-        .LEDCtrl		(ledctrl),
-        .SwitchCtrl		(switchctrl)
-    );
     
     ioread multiioread(
         .reset				(rst),

@@ -7,7 +7,7 @@ module Executs32 (
     input           reset,
     input           Waluresult,         // 写Aluresult的信号
     //   
-    input   [31:0]  PC_plus_4,           // 来自取指单元的PC+4
+    input   [31:0]  PC_plus_4,           // PC+4
     input	[31:0]	Read_data_1,		// 从译码单元的Read_data_1中来
     input	[31:0]	Read_data_2,		// 从译码单元的Read_data_2中来
     input   [1:0]   ALUOp,              // 来自控制单元的运算指令控制编码
@@ -73,7 +73,7 @@ module Executs32 (
     assign address = RegDst ? address1 : address0;
     
     always @(negedge clock or posedge reset) begin
-        if(reset) ALU_Result = 32'hxxxxxxxx;
+        if(reset) ALU_Result = 32'd0;
         else if(Waluresult) begin
             if(((ALU_ctl[2:1]==2'b11) && (I_format==1))||((ALU_ctl==3'b111) && (Exe_code[3]==1))) // 所有SLT类
                 ALU_Result = {31'd0,ALU_output_mux[31]};    // 符号位为1说明(rs)<(rt)

@@ -25,7 +25,6 @@ module control32 (
     output          Jrn,                // 为1表明当前指令是jr
     output          Jalr,               // Jalr
     
-    output          Branch,             // 分支
     output          Beq,                // 为1表明是Beq指令,原为Branch
     output          Bne,                // 为1表明是Bne指令,原为nBranch
     output          Bgez,
@@ -106,7 +105,7 @@ module control32 (
     assign Bltz = (op==6'b000001&&rt==5'b00000);
     assign Bgezal = (op==6'b000001&&rt==5'b10001);
     assign Bltzal = (op==6'b000001&&rt==5'b10000);
-    assign Branch = Beq||Bne||Bgez||Bgtz||Blez||Bltz||Bgezal||Bltzal;
+    //assign Branch = Beq||Bne||Bgez||Bgtz||Blez||Bltz||Bgezal||Bltzal;
    
     //J型指令
     assign Jmp = (op==6'b000010)? 1'b1:1'b0;            //j指令
