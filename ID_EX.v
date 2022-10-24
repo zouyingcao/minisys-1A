@@ -49,6 +49,8 @@ module ID_EX(
     input ID_MemIOtoReg,
     input ID_MemWrite,
     input ID_MemRead,
+    input ID_IORead,
+    input ID_IOWrite,
     input ID_Memory_sign,
     input [1:0] ID_Memory_data_width,
     
@@ -66,7 +68,7 @@ module ID_EX(
     input ID_Mtlo,
     input ID_Mthi,
     
-    output reg[31:0] EX_opcplus4,
+    output reg[31:0] EX_MEM_opcplus4,
     output reg[31:0] EX_dataA,
     output reg[31:0] EX_dataB,
     output reg[1:0]  EX_ALUOp,
@@ -91,6 +93,8 @@ module ID_EX(
     output reg EX_MEM_MemIOtoReg,
     output reg EX_MEM_MemWrite,
     output reg EX_MemRead,
+    output reg EX_MEM_IORead,
+    output reg EX_MEM_IOWrite,
     output reg EX_MEM_Memory_sign,
     output reg [1:0] EX_MEM_Memory_data_width,
     
@@ -111,7 +115,7 @@ module ID_EX(
     
     always @(posedge cpu_clk) begin
         if(reset)begin
-            EX_opcplus4 = 32'd0;
+            EX_MEM_opcplus4 = 32'd0;
             EX_dataA = 32'd0;
             EX_dataB = 32'd0;
             EX_ALUOp = 2'd0;
@@ -136,6 +140,8 @@ module ID_EX(
             EX_MEM_MemIOtoReg = 1'd0;
             EX_MEM_MemWrite = 1'd0;
             EX_MemRead = 1'd0;
+            EX_MEM_IORead = 1'd0;
+            EX_MEM_IOWrite = 1'd0;
             EX_MEM_Memory_sign = 1'd0;
             EX_MEM_Memory_data_width = 2'd0;
         
@@ -154,7 +160,7 @@ module ID_EX(
             EX_MEM_Mthi = 1'd0;
         
         end else if(stall)begin
-            EX_opcplus4 = ID_opcplus4;
+            EX_MEM_opcplus4 = ID_opcplus4;
             EX_dataA = ID_dataA;
             EX_dataB = ID_dataB;
             EX_ALUOp = 2'd0;
@@ -179,6 +185,8 @@ module ID_EX(
             EX_MEM_MemIOtoReg = 1'd0;
             EX_MEM_MemWrite = 1'd0;
             EX_MemRead = 1'd0;
+            EX_MEM_IORead = 1'd0;
+            EX_MEM_IOWrite = 1'd0;
             EX_MEM_Memory_sign = 1'd0;
             EX_MEM_Memory_data_width = 2'd0;
         
@@ -196,7 +204,7 @@ module ID_EX(
             EX_MEM_Mtlo = 1'd0;
             EX_MEM_Mthi = 1'd0;
         end else begin
-            EX_opcplus4 = ID_opcplus4;
+            EX_MEM_opcplus4 = ID_opcplus4;
             EX_dataA = ID_dataA;
             EX_dataB = ID_dataB;
             EX_ALUOp = ID_ALUOp;
@@ -221,6 +229,8 @@ module ID_EX(
             EX_MEM_MemIOtoReg = ID_MemIOtoReg;
             EX_MEM_MemWrite = ID_MemWrite;
             EX_MemRead = ID_MemRead;
+            EX_MEM_IORead = ID_IORead;
+            EX_MEM_IOWrite = ID_IOWrite;
             EX_MEM_Memory_sign = ID_Memory_sign;
             EX_MEM_Memory_data_width = ID_Memory_data_width;
         

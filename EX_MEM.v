@@ -27,6 +27,11 @@ module EX_MEM(
     input EX_Positive,
     input EX_Negative,
     
+    input EX_Jr,
+    input ID_EX_Jalr,
+    input ID_EX_Jmp,
+    input ID_EX_Jal,
+    
     input ID_EX_Beq,             //所有分支
     input ID_EX_Bne,             
     input ID_EX_Bgez,            
@@ -45,27 +50,39 @@ module EX_MEM(
     input ID_EX_Mtlo,
     
     input ID_EX_MemWrite,
+    input ID_EX_MemRead,
+    input ID_EX_IOWrite,
+    input ID_EX_IORead,
     input ID_EX_Memory_sign,
     input [1:0] ID_EX_Memory_data_width,
+    input [31:0] ID_EX_opcplus4,
     input [31:0] EX_Add_Result,     // ACU计算后的PC值
     input [31:0] EX_ALU_Result,	    // ALU计算的数据结果
     input [31:0] EX_Read_data_2,    // 32位寄存器2的值
     input [4:0]  EX_Wirte_Address,
 
-    output reg IF_Zero,
-    output reg IF_Positive,
-    output reg IF_Negative,
+    output reg MEM_WB_Zero,
+    output reg MEM_WB_Positive,
+    output reg MEM_WB_Negative,
     
-    output reg IF_Beq,             //所有分支
-    output reg IF_Bne,             
-    output reg IF_Bgez,            
-    output reg IF_Bgtz,
-    output reg IF_Bltz,     
-    output reg IF_Blez,        
-    output reg IF_Bgezal,         
-    output reg IF_Bltzal,
+    output reg MEM_WB_Jr,
+    output reg MEM_WB_Jalr,
+    output reg MEM_WB_Jmp,
+    output reg MEM_WB_Jal,
+    
+    output reg MEM_WB_Beq,             //所有分支
+    output reg MEM_WB_Bne,             
+    output reg MEM_WB_Bgez,            
+    output reg MEM_WB_Bgtz,
+    output reg MEM_WB_Bltz,     
+    output reg MEM_WB_Blez,        
+    output reg MEM_WB_Bgezal,         
+    output reg MEM_WB_Bltzal,
         
     output reg MEM_MemWrite,
+    output reg MEM_IOWrite,
+    output reg MEM_MemRead,
+    output reg MEM_IORead,
     output reg MEM_Memory_sign,
     output reg [1:0] MEM_Memory_data_width,
     output reg MEM_WB_RegWrite,
@@ -76,7 +93,8 @@ module EX_MEM(
     output reg MEM_WB_Mthi,
     output reg MEM_WB_Mtlo,
     
-    output reg[31:0] IF_Branch_PC,
+    //output reg[31:0] IF_Branch_PC,
+    output reg[31:0] MEM_WB_opcplus4,
     output reg[31:0] MEM_ALU_Result,
     output reg[31:0] MEM_Data_In,
     output reg[4:0]  MEM_WB_Waddr
