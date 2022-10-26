@@ -26,7 +26,7 @@ module keyboard(
     input read_enable,              // 读信号
     input keyboardCtrl,             // 键盘片选信号
     input [3:0] column,
-    input [3:0] address,            // 到keyboard模块的地址低端（此处为10/12/14）
+    input [2:0] address,            // 到keyboard模块的地址低端
     output reg[15:0] read_data_output, // 送到CPU的4x4键盘值
     output reg[3:0] row
     );
@@ -72,11 +72,11 @@ module keyboard(
                         if(column == 4'b1110)
                             value[11:8] = 4'hD;
                         else if(column == 4'b1101)
-                            value[11:8] = 4'hE;
-                        else if(column == 4'b1011)
                             value[11:8] = 4'hF;
-                        else if(column == 4'b0111)
+                        else if(column == 4'b1011)
                             value[11:8] = 4'h0;
+                        else if(column == 4'b0111)
+                            value[11:8] = 4'hE;
                     end
                 end 
                 3'b011:begin // 第二行(7,8,9,C)
@@ -137,8 +137,8 @@ module keyboard(
 
         if (read_enable == 1)
             case (address)
-                3'b000: read_data_output = value; // {4'd0,column,row,value}
-                3'b010:
+                3'b000: read_data_output = value; // {4'd0,column,row,value},键值寄存器(0FFFFFC10H)
+                3'b010: // 状态寄存器(0XFFFFFC12)
                     read_data_output = (state > 3'd1) ? 16'd1:16'd0;
                 default: read_data_output = 16'hZZZZ;
             endcase
