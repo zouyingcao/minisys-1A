@@ -23,10 +23,12 @@
 module wb(
     input  [31:0]	read_data,		// 从DATA RAM or I/O port取出的数据
     input  [31:0]   ALU_result,     // 从执行单元来的运算的结果，需要扩展立即数到32位
-    input           MemIOtoReg,        
+    input  [31:0]   cp0_data_in,
+    input           MemIOtoReg,  
+    input           Mfc0,      
     output [31:0]   wb_data
     );
     
-    assign wb_data = MemIOtoReg ? read_data : ALU_result;
+    assign wb_data = Mfc0 ? cp0_data_in : MemIOtoReg ? read_data : ALU_result;
     
 endmodule

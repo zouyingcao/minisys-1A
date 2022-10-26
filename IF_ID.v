@@ -25,25 +25,25 @@ module IF_ID(
     input reset,
     input flush,                      // IF/ID寄存器清空信号
     input PCWrite,
-    //input [31:0] IF_PC,             //取指单元输出PC
+    input [31:0] IF_PC,               
     input [31:0] IF_opcplus4,         //取指单元输出锁存的PC+4
     input [31:0] IF_instruction,      //取指单元输出指令
-    //output reg[31:0] ID_PC,         //译码单元输入PC
+    output reg[31:0] ID_EX_PC,       
     output reg[31:0] ID_opcplus4,
     output reg[31:0] ID_instruction  
     );
     
     always @(posedge cpu_clk) begin
         if(reset)begin
-            //ID_PC = 32'd0;
+            ID_EX_PC = 32'd0;
             ID_instruction = 32'd0;
             ID_opcplus4 = 32'd0;
         end else if(flush)begin
-            //ID_PC = 32'd0;
+            ID_EX_PC = 32'd0;
             ID_instruction = 32'd0;
             ID_opcplus4 = 32'd0;
         end else if(PCWrite) begin
-            //ID_PC = IF_PC;
+            ID_EX_PC = IF_PC;
             ID_instruction = IF_instruction;
             ID_opcplus4 = IF_opcplus4;
         end           

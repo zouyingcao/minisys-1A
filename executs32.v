@@ -42,6 +42,8 @@ module Executs32 (
     
     output  [4:0]   address,   
     output reg[31:0]ALU_Result,			// 计算的数据结果
+    output	[31:0]	rt_value,
+    output  [4:0]   rd,
     output	[31:0]	Add_Result			// 计算的地址结果     
 );
 
@@ -65,12 +67,14 @@ module Executs32 (
     assign Ainput = (ALUSrcA==2'b00) ? Read_data_1 : (ALUSrcA==2'b01) ? EX_MEM_ALU_result : WB_data;
     // 00:register(rt),11:imm32,01:EX_MEM_xxx,10:MEM_WB_xxx
     assign Binput = (ALUSrcB==2'b00) ? Read_data_2 : (ALUSrcB==2'b01) ? EX_MEM_ALU_result : (ALUSrcB==2'b10) ? WB_data : Sign_extend[31:0]; 
+    assign rt_value = Binput;
     
     assign Exe_code = (I_format==0) ? Func:{3'b000,Op[2:0]};
     assign ALU_ctl[0] = (Exe_code[0] | Exe_code[3]) & ALUOp[1]; 
     assign ALU_ctl[1] = ((!Exe_code[2]) | (!ALUOp[1]));
     assign ALU_ctl[2] = (Exe_code[1] & ALUOp[1]) | ALUOp[0];
     assign address = RegDst ? address1 : address0;
+    assign rd = address1;
     
     always @(negedge clock or posedge reset) begin
         if(reset) ALU_Result = 32'd0;

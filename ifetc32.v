@@ -16,7 +16,8 @@ module Ifetc32 (
     input           IFBranch,
     input           nBranch, 
     input   [31:0]  ID_opcplus4,
-                             
+    
+    output reg[31:0]PC,              
     output  [31:0]  opcplus4,			// jal指令专用的PC+4
     output  [31:0]  Instruction,        // 输出指令到其他模块
     // output  [31:0]  PC_plus_4_out,   // (pc+4)送执行单元
@@ -29,7 +30,6 @@ module Ifetc32 (
 );
     
     wire [31:0] PC_plus_4;
-    reg [31:0] PC;
     reg [31:0] next_PC;		                 // 下条指令的PC（不一定是PC+4)
    
     assign Instruction = Jpadr;              // 取出指令

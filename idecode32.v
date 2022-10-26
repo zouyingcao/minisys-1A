@@ -14,7 +14,9 @@ module Idecode32 (
     input			Jalr,			// jalr 
     input           Bgezal,
     input           Bltzal,
+    input           Negative,
     input			RegWrite,		
+    
     output [25:0]   Jump_PC,
     output [31:0]   read_data_1,    // 输出的第一操作数
     output [31:0]   read_data_2,    // 输出的第二操作数
@@ -22,32 +24,15 @@ module Idecode32 (
     output [4:0]    write_address_0,// i-form指令要写的寄存器的号(rt)
     output [31:0]   write_data,     // 要写入寄存器的数据
     output [31:0]	Sign_extend,	// 译码单元输出的扩展后的32位立即数
-    output [4:0]    rs,             // rs
-    
-    //input           Positive,
-    input           Negative,
-    input           Overflow,
-    input           Divide_zero,
-    input           Reserved_instruction,
-    input           Mfc0,           // 特权指令
-    input           Mtc0,
-    input           Break,
-    input           Syscall,
-    input           Eret,
-    input  [31:0]   cp0_data_in,
-    output          cp0_wen,
-    output [31:0]   cp0_data_out,
-    output [4:0]    causeExcCode
-    
-    
+    output [4:0]    rs              // rs
 );
     
-    reg[31:0] register[0:31];			     // 寄存器组共32个32位寄存器
-    reg[4:0] write_register_address;        // 要写的寄存器的号
+    reg[31:0] register[0:31];			        // 寄存器组共32个32位寄存器
+    reg[4:0] write_register_address;            // 要写的寄存器的号
 
-    wire[4:0] rt;       // 要读的第二个寄存器的号（rt）
-    wire[15:0] Instruction_immediate_value;  // 指令中的立即数
-    wire[5:0] opcode;                        // 指令码
+    wire[4:0] rt;                               // 要读的第二个寄存器的号（rt）
+    wire[15:0] Instruction_immediate_value;     // 指令中的立即数
+    wire[5:0] opcode;                           // 指令码
     
     assign opcode = Instruction[31:26];	                        // op
     assign rs = Instruction[25:21];                             // rs
@@ -57,7 +42,7 @@ module Idecode32 (
     assign Instruction_immediate_value = Instruction[15:0];     // immediate
     assign Jump_PC = Instruction[25:0];                         // address
     
-    wire sign;                                            // 取符号位的值
+    wire sign;                                  // 取符号位的值
     assign sign = Instruction[15];
     // andi,ori,xori,sltui零扩展, 其余符号扩展
     assign Sign_extend = (opcode==6'b001100||opcode==6'b001101||opcode==6'b001110||opcode==6'b001011) ? {16'd0,Instruction_immediate_value} : {{16{sign}},Instruction_immediate_value};
@@ -66,7 +51,7 @@ module Idecode32 (
     assign read_data_2 = register[rt];
     assign write_data = (Jal || Jalr || Bgezal || Bltzal) ? opcplus4 : wb_data; // ($31)←(PC)+4(jal,bgezal,bltzal)或(rd)←(PC)+4(jalr)
     
-    always @* begin                                            // 这个进程指定不同指令下的目标寄存器
+    always @* begin                              // 这个进程指定不同指令下的目标寄存器
         if(Jal || (Bgezal && !Negative) || (Bltzal && Negative))
             write_register_address = 5'd31;
         else if(Bgezal||Bltzal)
@@ -84,14 +69,5 @@ module Idecode32 (
                 register[write_register_address] = write_data;
         end
     end
-    
-    assign causeExcCode = (Syscall) ? 5'b01000 : //系统调用 syscall
-                          (Break) ? 5'b01001 : //绝对断点指令   break
-                          (Reserved_instruction) ? 5'b01010 : // 保留指令,cpu执行到一条未定义的指令
-                          (Overflow) ?  5'b01100 : //算术溢出，有符号运算加减溢出
-                          // (keyboardbreak) ? 5'b00000 : //外部中断 
-                          5'b11111;  
-    assign cp0_wen = (Mfc0 || Mtc0 || Break || Syscall || Overflow || Divide_zero || Reserved_instruction);
-    assign cp0_data_out = cp0_wen ? write_data:32'd0;
-    
+
 endmodule

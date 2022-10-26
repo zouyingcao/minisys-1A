@@ -25,6 +25,7 @@ module ID_EX(
     input reset,
     input stall,
     input [31:0] ID_opcplus4,
+    input [31:0] IF_ID_PC,
     input [31:0] ID_dataA,
     input [31:0] ID_dataB,
     input [1:0]  ID_ALUOp,
@@ -68,7 +69,15 @@ module ID_EX(
     input ID_Mtlo,
     input ID_Mthi,
     
+    input ID_Mfc0,
+    input ID_Mtc0,
+    input ID_Break,
+    input ID_Syscall,
+    input ID_Eret,
+    input ID_Reserved_instruction,
+    
     output reg[31:0] EX_MEM_opcplus4,
+    output reg[31:0] EX_MEM_PC,
     output reg[31:0] EX_dataA,
     output reg[31:0] EX_dataB,
     output reg[1:0]  EX_ALUOp,
@@ -110,12 +119,20 @@ module ID_EX(
     output reg EX_MEM_Mflo,
     output reg EX_MEM_Mfhi,
     output reg EX_MEM_Mtlo,
-    output reg EX_MEM_Mthi
+    output reg EX_MEM_Mthi,
+    
+    output reg EX_MEM_Mfc0,
+    output reg EX_MEM_Mtc0,
+    output reg EX_MEM_Break,
+    output reg EX_MEM_Syscall,
+    output reg EX_MEM_Eret,
+    output reg EX_MEM_Reserved_instruction
     );
     
     always @(posedge cpu_clk) begin
         if(reset)begin
             EX_MEM_opcplus4 = 32'd0;
+            EX_MEM_PC = 32'd0;
             EX_dataA = 32'd0;
             EX_dataB = 32'd0;
             EX_ALUOp = 2'd0;
@@ -158,9 +175,17 @@ module ID_EX(
             EX_MEM_Mfhi = 1'd0;
             EX_MEM_Mtlo = 1'd0;
             EX_MEM_Mthi = 1'd0;
-        
+            
+            EX_MEM_Mfc0 = 1'd0;
+            EX_MEM_Mtc0 = 1'd0;
+            EX_MEM_Break = 1'd0;
+            EX_MEM_Syscall = 1'd0;
+            EX_MEM_Eret = 1'd0;
+            EX_MEM_Reserved_instruction = 1'd0;
+            
         end else if(stall)begin
             EX_MEM_opcplus4 = ID_opcplus4;
+            EX_MEM_PC = IF_ID_PC;
             EX_dataA = ID_dataA;
             EX_dataB = ID_dataB;
             EX_ALUOp = 2'd0;
@@ -203,8 +228,16 @@ module ID_EX(
             EX_MEM_Mfhi = 1'd0;
             EX_MEM_Mtlo = 1'd0;
             EX_MEM_Mthi = 1'd0;
+            
+            EX_MEM_Mfc0 = 1'd0;
+            EX_MEM_Mtc0 = 1'd0;
+            EX_MEM_Break = 1'd0;
+            EX_MEM_Syscall = 1'd0;
+            EX_MEM_Eret = 1'd0;
+            EX_MEM_Reserved_instruction = 1'd0;
         end else begin
             EX_MEM_opcplus4 = ID_opcplus4;
+            EX_MEM_PC = IF_ID_PC;
             EX_dataA = ID_dataA;
             EX_dataB = ID_dataB;
             EX_ALUOp = ID_ALUOp;
@@ -247,6 +280,13 @@ module ID_EX(
             EX_MEM_Mfhi = ID_Mfhi;
             EX_MEM_Mtlo = ID_Mtlo;
             EX_MEM_Mthi = ID_Mthi;
+            
+            EX_MEM_Mfc0 = ID_Mfc0;
+            EX_MEM_Mtc0 = ID_Mtc0;
+            EX_MEM_Break = ID_Break;
+            EX_MEM_Syscall = ID_Syscall;
+            EX_MEM_Eret = ID_Eret;
+            EX_MEM_Reserved_instruction = ID_Reserved_instruction;
         end           
     end
 endmodule
