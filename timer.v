@@ -23,6 +23,8 @@
 module timer(
     input clock,
     input reset,
+    input pluse0,
+    input pluse1,
     input read_enable,              // 读信号
     input write_enable,             // 写信号
     input timerCtrl,                // 定时器/计数器片选信号
