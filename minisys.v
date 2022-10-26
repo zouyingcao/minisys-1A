@@ -365,7 +365,7 @@ module minisys (
         .reset          (rst),
         .stall          (id_ex_stall),
         .ID_opcplus4    (id_opcplus4),
-        .IF_EX_PC       (id_ex_pc),
+        .IF_ID_PC       (id_ex_pc),
         .ID_dataA       (read_data_1),
         .ID_dataB       (read_data_2),
         .ID_ALUOp       (aluop),
@@ -549,7 +549,6 @@ module minisys (
         .EX_Zero        (zero),
         .EX_Positive    (positive),
         .EX_Negative    (negative),
-        .EX_Overflow    (overflow),
         .EX_rd          (rd),
         .EX_rt_value    (rt_value),
         
@@ -573,7 +572,7 @@ module minisys (
         .ID_EX_Mtlo     (ex_mem_mtlo),
         
         .EX_Overflow    (overflow),
-        .EX_divide_zero (div_zero),
+        .EX_Divide_zero (div_zero),
         .ID_EX_Mfc0     (ex_mem_mfc0),
         .ID_EX_Mtc0     (ex_mem_mtc0),
         .ID_EX_Break    (ex_mem_break),
@@ -601,7 +600,7 @@ module minisys (
         .MEM_WB_Negative(mem_wb_negative),
         .MEM_WB_Positive(mem_wb_positive),
         .MEM_WB_rd      (mem_wb_rd),
-        .MEM_WB_rt_value(mem_dataB),
+        //.MEM_WB_rt_value(mem_dataB),
         .MEM_WB_Jr      (mem_wb_jr),
         .MEM_WB_Jalr    (mem_wb_jalr),
         .MEM_WB_Jmp     (mem_wb_jmp),
@@ -631,7 +630,7 @@ module minisys (
         .MEM_WB_Mtlo    (mem_wb_mtlo),
        
         .MEM_WB_Overflow(mem_wb_overflow),
-        .MEM_WB_divide_zero(mem_wb_divide_zero),
+        .MEM_WB_Divide_zero(mem_wb_divide_zero),
         .MEM_WB_Mfc0    (mem_wb_mfc0),
         .MEM_WB_Mtc0    (mem_wb_mtc0),
         .MEM_WB_Break   (mem_wb_break),
@@ -717,7 +716,7 @@ module minisys (
        .EX_MEM_Mtlo     (mem_wb_mtlo),
        
        .EX_MEM_Overflow(mem_wb_overflow),
-       .EX_MEM_divide_zero(mem_wb_divide_zero),
+       .EX_MEM_Divide_zero(mem_wb_divide_zero),
        .EX_MEM_Mfc0    (mem_wb_mfc0),
        .EX_MEM_Mtc0    (mem_wb_mtc0),
        .EX_MEM_Break   (mem_wb_break),
@@ -746,7 +745,7 @@ module minisys (
        .WB_Negative     (wb_negative),
        
        .WB_Overflow     (wb_overflow),
-       .WB_divide_zero  (wb_divide_zero),
+       .WB_Divide_zero  (wb_divide_zero),
        .WB_Mfc0         (wb_mfc0),
        .WB_Mtc0         (wb_mtc0),
        .WB_Break        (wb_break),

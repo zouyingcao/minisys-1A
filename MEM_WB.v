@@ -49,7 +49,7 @@ module MEM_WB(
     input EX_MEM_Syscall,
     input EX_MEM_Break,
     input EX_MEM_Eret,
-    input EX_MEM_Reserved_intruction,
+    input EX_MEM_Reserved_instruction,
     
     output reg WB_RegWrite,
     output reg WB_MemIOtoReg,
@@ -72,7 +72,7 @@ module MEM_WB(
     output reg WB_Syscall,
     output reg WB_Break,
     output reg WB_Eret,
-    output reg WB_Reserved_intruction,
+    output reg WB_Reserved_instruction,
     
     output reg[31:0] WB_opcplus4,
     output reg[31:0] WB_PC,
@@ -105,7 +105,7 @@ module MEM_WB(
             WB_Syscall = 1'b0;
             WB_Break = 1'b0;
             WB_Eret = 1'b0;
-            WB_Reserved_intruction = 1'b0;
+            WB_Reserved_instruction = 1'b0;
             
             WB_opcplus4 = 32'd0;
             WB_PC = 32'd0;
@@ -135,7 +135,7 @@ module MEM_WB(
             WB_Syscall = EX_MEM_Syscall;
             WB_Break = EX_MEM_Break;
             WB_Eret = EX_MEM_Eret;
-            WB_Reserved_intruction = EX_MEM_Reserved_intruction;
+            WB_Reserved_instruction = EX_MEM_Reserved_instruction;
             
             WB_opcplus4 = EX_MEM_opcplus4;
             WB_PC = EX_MEM_PC;

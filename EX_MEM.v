@@ -59,7 +59,7 @@ module EX_MEM(
     input ID_EX_Syscall,
     input ID_EX_Break,
     input ID_EX_Eret,
-    input ID_EX_Reserved_intruction,
+    input ID_EX_Reserved_instruction,
     
     input ID_EX_MemWrite,
     input ID_EX_MemRead,
@@ -113,7 +113,7 @@ module EX_MEM(
     output reg MEM_WB_Syscall,
     output reg MEM_WB_Break,
     output reg MEM_WB_Eret,
-    output reg MEM_WB_Reserved_intruction,
+    output reg MEM_WB_Reserved_instruction,
     
     //output reg[31:0] IF_Branch_PC,
     output reg[31:0] MEM_WB_opcplus4,
@@ -164,7 +164,7 @@ module EX_MEM(
             MEM_WB_Syscall = 1'd0;
             MEM_WB_Break = 1'd0;
             MEM_WB_Eret = 1'd0;
-            MEM_WB_Reserved_intruction = 1'd0;
+            MEM_WB_Reserved_instruction = 1'd0;
             
             MEM_WB_opcplus4 = 32'd0;
             MEM_WB_PC = 32'd0;
@@ -212,7 +212,7 @@ module EX_MEM(
             MEM_WB_Syscall = ID_EX_Syscall;
             MEM_WB_Break = ID_EX_Break;
             MEM_WB_Eret = ID_EX_Eret;
-            MEM_WB_Reserved_intruction = ID_EX_Reserved_intruction;
+            MEM_WB_Reserved_instruction = ID_EX_Reserved_instruction;
             
             MEM_WB_opcplus4 = ID_EX_opcplus4;
             MEM_WB_PC = ID_EX_PC;
