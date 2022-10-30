@@ -64,8 +64,8 @@ module branchTest(
     
     wire Zero,Negative,Positive;
     assign Zero = rs==rt;
-    assign Negative = rs<0;
-    assign Positive = rs>0;
+    assign Negative = rs[31]==1'b1;
+    assign Positive = (rs[31]==1'b0&&rs!=32'd0);
     
     // 有条件跳转,条件不成立时
     assign nBranch = (Beq&&!Zero)||(Bne&&Zero)||

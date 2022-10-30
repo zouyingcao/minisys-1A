@@ -89,7 +89,7 @@ module minisys (
     wire [1:0]memory_data_width;
     wire memoriotoreg;
     wire sftmd;
-    wire i_format;
+    wire i_format,s_format,l_format;
     wire beq,bne,bgez,bgtz,blez,bltz,bgezal,bltzal;
     wire jmp,jal,jr,jalr;
     wire mfhi,mflo,mfc0,mthi,mtlo,mtc0;
@@ -117,7 +117,7 @@ module minisys (
     wire ex_alusrc;
     wire [4:0] ex_address0,ex_address1,ex_rs,ex_shamt;
     wire [5:0] ex_func,ex_op;
-    wire ex_regdst,ex_sftmd,ex_divsel,ex_i_format;
+    wire ex_regdst,ex_sftmd,ex_divsel,ex_i_format,ex_s_format,ex_l_format;
     wire ex_jr,ex_mem_jmp,ex_mem_jalr,ex_mem_jal;
     wire ex_memread,ex_mem_regwrite,ex_mem_memoriotoreg,ex_mem_memwrite,ex_mem_ioread,ex_mem_iowrite,ex_mem_memory_sign;
     wire [1:0] ex_mem_memory_data_width;
@@ -282,15 +282,17 @@ module minisys (
         ///.Waluresult     (waluresult),
  
         .Instruction    (id_instruction),
+        .s_format       (ex_s_format),
+        .l_format       (ex_l_format),
         .Alu_resultHigh (alu_result[31:10]),
         .RegDST         (regdst),
         .ALUSrc         (alusrc),
-        .MemIOtoReg     (memoriotoreg),
+        .MemIOtoReg     (ex_mem_memoriotoreg),///
         .RegWrite       (regwrite),
-        .MemRead        (memread),
-        .MemWrite       (memwrite),
-        .IORead         (ioread),
-        .IOWrite        (iowrite),
+        .MemRead        (ex_memread),///
+        .MemWrite       (ex_mem_memwrite),///
+        .IORead         (ex_mem_ioread),///
+        .IOWrite        (ex_mem_iowrite),////
         
         .Jmp            (jmp),
         .Jal            (jal),
@@ -314,6 +316,8 @@ module minisys (
         .Mtc0           (mtc0),
         
         .I_format       (i_format),
+        .S_format       (s_format),
+        .L_format       (l_format),
         .Sftmd          (sftmd),
         .DivSel         (divsel),
         .ALUOp          (aluop),
@@ -381,17 +385,19 @@ module minisys (
         .ID_Sftmd       (sftmd),    
         .ID_DivSel      (divsel),
         .ID_I_format    (i_format),
+        .ID_S_format    (s_format),
+        .ID_L_format    (l_format),
         .ID_Jr          (jr),
         .ID_Jmp         (jmp),
         .ID_Jal         (jal),
         .ID_Jalr        (jalr),
     
         .ID_RegWrite    (regwrite),      
-        .ID_MemIOtoReg  (memoriotoreg),
-        .ID_MemWrite    (memwrite),
-        .ID_MemRead     (memread),
-        .ID_IORead      (ioread),
-        .ID_IOWrite     (iowrite),
+        //.ID_MemIOtoReg  (memoriotoreg),
+        //.ID_MemWrite    (memwrite),
+        //.ID_MemRead     (memread),
+        //.ID_IORead      (ioread),
+        //.ID_IOWrite     (iowrite),
         .ID_Memory_sign (memory_sign),
         .ID_Memory_data_width(memory_data_width),
         .ID_Beq         (beq),
@@ -432,17 +438,19 @@ module minisys (
         .EX_Sftmd       (ex_sftmd),    
         .EX_DivSel      (ex_divsel),
         .EX_I_format    (ex_i_format),
+        .EX_S_format    (ex_s_format),
+        .EX_L_format    (ex_l_format),
         .EX_Jr          (ex_jr),
         .EX_MEM_Jmp     (ex_mem_jmp),
         .EX_MEM_Jal     (ex_mem_jal),
         .EX_MEM_Jalr    (ex_mem_jalr),
     
         .EX_MEM_RegWrite(ex_mem_regwrite),      //传去EX_MEM
-        .EX_MEM_MemIOtoReg(ex_mem_memoriotoreg),
-        .EX_MEM_MemWrite(ex_mem_memwrite),
-        .EX_MemRead     (ex_memread),
-        .EX_MEM_IORead  (ex_mem_ioread),
-        .EX_MEM_IOWrite (ex_mem_iowrite),
+        //.EX_MEM_MemIOtoReg(ex_mem_memoriotoreg),
+        //.EX_MEM_MemWrite(ex_mem_memwrite),
+        //.EX_MemRead     (ex_memread),
+        //.EX_MEM_IORead  (ex_mem_ioread),
+        //.EX_MEM_IOWrite (ex_mem_iowrite),
         .EX_MEM_Memory_sign (ex_mem_memory_sign),
         .EX_MEM_Memory_data_width(ex_mem_memory_data_width),
         
@@ -473,13 +481,13 @@ module minisys (
         .EX_rt          (ex_address0),      // rt
         .EX_Mflo        (ex_mem_mflo),
         .EX_Mfhi        (ex_mem_mfhi),
-        .EX_ALUSrc      (ex_alusrc),        // 是否选择扩展后的立即数
+        //.EX_ALUSrc      (ex_alusrc),        // 是否选择扩展后的立即数
         
         .ID_rs          (rs),		        // ID段
         .ID_rt          (addr0),            
         .ID_Mflo        (mflo),
         .ID_Mfhi        (mfhi),
-        .ID_ALUSrc      (alusrc),      
+        //.ID_ALUSrc      (alusrc),      
         
         .ID_EX_RegWrite (ex_mem_regwrite),
         .ID_EX_waddr    (ex_address),
@@ -520,6 +528,7 @@ module minisys (
         .Func           (ex_func),// func
         .Op             (ex_op),//op code
         .Shamt          (ex_shamt),
+        .ALUSrc         (ex_alusrc), 
         .ALUSrcA        (ex_alusrcA),
         .ALUSrcB        (ex_alusrcB),
         .EX_MEM_ALU_result(mem_aluresult),
@@ -528,6 +537,11 @@ module minisys (
         .Sftmd          (ex_sftmd),
         .DivSel         (ex_divsel),
         .Jrn            (ex_jr),
+        
+        .Mfhi           (ex_mem_mfhi),
+        .Mflo           (ex_mem_mflo),
+        .Mthi           (ex_mem_mthi),
+        .Mtlo           (ex_mem_mtlo),
         
         .Zero           (zero),
         .Positive       (positive),

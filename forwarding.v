@@ -25,13 +25,11 @@ module forwarding(
     input	[4:0]	ID_rt,		    // rt
     input           ID_Mflo,
     input           ID_Mfhi,
-    input           ID_ALUSrc,     
     
     input	[4:0]	EX_rs,		    // 非分支
     input   [4:0]   EX_rt,        
     input           EX_Mflo,
     input           EX_Mfhi,
-    input           EX_ALUSrc,     // 是否选择扩展后的立即数
     
     //用于分支源数据
     input           ID_EX_RegWrite,
@@ -64,8 +62,11 @@ module forwarding(
                         || (EX_Mflo && !EX_MEM_Mtlo && MEM_WB_Mtlo) || (EX_Mfhi && !EX_MEM_Mthi && MEM_WB_Mthi);// 只与上上条相关
     
     // 00:register(rt),11:imm32,01:EX_MEM_xxx,10:MEM_WB_xxx
-    assign ALUSrcB[0] = (EX_ALUSrc == 1)? 1:EX_MEM_RegWrite && EX_rt==EX_MEM_waddr;
-    assign ALUSrcB[1] = (EX_ALUSrc == 1)? 1:MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && EX_MEM_waddr!=EX_rt;
+    // assign ALUSrcB[0] = (EX_ALUSrc == 1)? 1:EX_MEM_RegWrite && EX_rt==EX_MEM_waddr;
+    // assign ALUSrcB[1] = (EX_ALUSrc == 1)? 1:MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && EX_MEM_waddr!=EX_rt;
+    // 不可能出现11的情况
+    assign ALUSrcB[0] = EX_MEM_RegWrite && EX_rt==EX_MEM_waddr;
+    assign ALUSrcB[1] = MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && EX_MEM_waddr!=EX_rt;
     
     // 用于分支指令源数据
     assign ALUSrcC = 

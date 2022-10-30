@@ -10,6 +10,8 @@ module control32 (
     output          Waluresult,         //写aluresult的信号
     // 
     input   [31:0]  Instruction,
+    input           s_format,
+    input           l_format,
     input   [21:0]  Alu_resultHigh,     // 读操作需要从端口或存储器读数据到寄存器,LW和SW的真正地址为Alu_Result,Alu_resultHigh = Alu_result[31:10];
     output			RegDST,				// 为1表明目的寄存器是rd，否则目的寄存器是rt
     output			ALUSrc,				// 为1表明第二个操作数是立即数（beq，bne除外）
@@ -42,6 +44,8 @@ module control32 (
     output          Mtc0,
     
     output			I_format,			// 为1表明该指令是除beq，bne，LW，SW之外的其他I-类型指令
+    output          S_format,           // 表示写存储器
+    output          L_format,           // 表示从存储器读出数据
     output			Sftmd,				// 为1表明是移位指令
     output          DivSel,
     output	[1:0]	ALUOp,				// 是R-类型或I_format=1时位1为1, beq、bne指令则位0为1
@@ -55,8 +59,6 @@ module control32 (
 );
    
     wire R_format;		// 为1表示是R-类型指令
-    wire L_format;     // 表示从存储器读出数据
-    wire S_format;     // 表示写存储器
     reg [2:0] state;
     reg [2:0] next_state;
     parameter [2:0] sinit = 3'b000,//
@@ -111,11 +113,11 @@ module control32 (
     assign Jmp = (op==6'b000010)? 1'b1:1'b0;            //j指令
     assign Jal = (op==6'b000011)? 1'b1:1'b0;            //jal指令
 
-    assign MemRead = L_format&&(Alu_resultHigh!=22'b1111111111111111111111);    
-    assign IORead = L_format&&(Alu_resultHigh==22'b1111111111111111111111);     
-    assign MemWrite = S_format&&(Alu_resultHigh!=22'b1111111111111111111111);   
-    assign IOWrite = S_format&&(Alu_resultHigh==22'b1111111111111111111111);   
-    assign MemIOtoReg = L_format; 
+    assign MemRead = l_format&&(Alu_resultHigh!=22'b1111111111111111111111);    
+    assign IORead = l_format&&(Alu_resultHigh==22'b1111111111111111111111);     
+    assign MemWrite = s_format&&(Alu_resultHigh!=22'b1111111111111111111111);   
+    assign IOWrite = s_format&&(Alu_resultHigh==22'b1111111111111111111111);   
+    assign MemIOtoReg = l_format;
     
     assign Sftmd = (op==6'b000000&&(func[5:2]==4'b0001&&shamt==5'b00000||func[5:2]==4'b0000&&rs==5'b00000));//sll,srl,sra,sllv,srlv,srav
     assign DivSel = (op==6'b000000&&func[5:1]==5'b01101);
@@ -179,7 +181,7 @@ module control32 (
         endcase
     end
     
-    always @(posedge clock or posedge reset) begin
+    always @(negedge clock or posedge reset) begin
         if(reset) begin
             state <= sinit;
         end else begin

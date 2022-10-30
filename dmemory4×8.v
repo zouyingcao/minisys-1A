@@ -38,7 +38,7 @@ module dmemory4x8(
 	input           upg_done_i      // 1 if programming is finished
     );
     
-    wire ram_clk = !ram_clk_i;	    // 因为使用Block ram的固有延迟，RAM的地址线来不及在时钟上升沿准备好,
+    wire ram_clk = ram_clk_i;	    // 因为使用Block ram的固有延迟，RAM的地址线来不及在时钟上升沿准备好,
                                     // 使得时钟上升沿数据读出有误，所以采用反相时钟，使得读出数据比地址准
                                     // 备好要晚大约半个时钟，从而得到正确地址。
                                  
@@ -66,7 +66,7 @@ module dmemory4x8(
                 bit_error = (!(ram_adr_i[1:0]==2'b00))&&ram_wen_i;
                 ram_wen = 4'b1111&&{4{ram_wen_i}};
             end 
-            default:bit_error=ram_wen_i;// 2'b10
+            default:bit_error = ram_wen_i;// 2'b10
         endcase
     end
     
@@ -88,7 +88,7 @@ module dmemory4x8(
         .clka     (kickOff ?    ram_clk      : upg_clk_i),
         .wea      (kickOff ?    ram_wen[2]    : upg_wen_i),
         .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
-        .dina     (kickOff ?    ram_dat_i[23:16]: upg_dat_i),
+        .dina     (kickOff ?    ram_dat_i[23:16]: upg_dat_i[23:16]),
         .douta    (ram_data2)
     );
     ram3 ram3 (

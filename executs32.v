@@ -19,6 +19,7 @@ module Executs32 (
     input	[4:0]	address1,		    // rd
     input			Sftmd,				// 来自控制单元的，表明是移位指令
     input           DivSel,
+    input           ALUSrc,
     input	[1:0]	ALUSrcA,			
     input   [1:0]   ALUSrcB,
     input			I_format,			// 来自控制单元，表明是除beq, bne, LW, SW之外的I-类型指令
@@ -49,15 +50,15 @@ module Executs32 (
 
     wire[31:0] Ainput,Binput;
     reg[31:0] Sinput;
-    reg[31:0] ALU_output_mux;
+    reg[32:0] ALU_output_mux;
     wire[2:0] ALU_ctl;
     wire[5:0] Exe_code;   
     
     wire mult,multu,div,divu;
     wire[63:0] mul_signed_result;
     wire[63:0] mul_unsigned_result;
-    wire[31:0] div_signed_result;
-    wire[31:0] div_unsigned_result;
+    wire[63:0] div_signed_result;
+    wire[63:0] div_unsigned_result;
     wire div_dout_tvalid;
     wire divu_dout_tvalid;
     wire div_zero;
@@ -66,27 +67,22 @@ module Executs32 (
     // 00:register(rs),01:EX_MEM_xxx,10:MEM_WB_xxx
     assign Ainput = (ALUSrcA==2'b00) ? Read_data_1 : (ALUSrcA==2'b01) ? EX_MEM_ALU_result : WB_data;
     // 00:register(rt),11:imm32,01:EX_MEM_xxx,10:MEM_WB_xxx
-    assign Binput = (ALUSrcB==2'b00) ? Read_data_2 : (ALUSrcB==2'b01) ? EX_MEM_ALU_result : (ALUSrcB==2'b10) ? WB_data : Sign_extend[31:0]; 
-    assign rt_value = Binput;
+    // assign Binput = (ALUSrcB==2'b00) ? Read_data_2 : (ALUSrcB==2'b01) ? EX_MEM_ALU_result : (ALUSrcB==2'b10) ? WB_data : Sign_extend[31:0]; 
+    assign Binput = (ALUSrc==1'b1) ? Sign_extend[31:0]:(ALUSrcB==2'b00) ? Read_data_2 : (ALUSrcB==2'b01) ? EX_MEM_ALU_result : WB_data;
+    assign rt_value = (ALUSrcB==2'b00) ? Read_data_2 : (ALUSrcB==2'b01) ? EX_MEM_ALU_result : WB_data;
+    
+    wire signed [31:0] s_Ainput;
+    wire signed [31:0] s_Binput;
+    assign s_Ainput = Ainput;
+    assign s_Binput = Binput;
     
     assign Exe_code = (I_format==0) ? Func:{3'b000,Op[2:0]};
-    assign ALU_ctl[0] = (Exe_code[0] | Exe_code[3]) & ALUOp[1]; 
+    //assign ALU_ctl[0] = (Exe_code[0] | Exe_code[3]) & ALUOp[1]; 
+    assign ALU_ctl[0] = Exe_code[0] & ALUOp[1]; 
     assign ALU_ctl[1] = ((!Exe_code[2]) | (!ALUOp[1]));
     assign ALU_ctl[2] = (Exe_code[1] & ALUOp[1]) | ALUOp[0];
     assign address = RegDst ? address1 : address0;
     assign rd = address1;
-    
-    always @(negedge clock or posedge reset) begin
-        if(reset) ALU_Result = 32'd0;
-        else if(Waluresult) begin
-            if(((ALU_ctl[2:1]==2'b11) && (I_format==1))||((ALU_ctl==3'b111) && (Exe_code[3]==1))) // 所有SLT类
-                ALU_Result = {31'd0,ALU_output_mux[31]};    // 符号位为1说明(rs)<(rt)
-            else if((ALU_ctl==3'b101) && (I_format==1))     // lui
-                ALU_Result[31:0] = {Binput,16'd0};          
-            else if(Sftmd==1) ALU_Result = Sinput;          // 移位
-            else  ALU_Result = ALU_output_mux[31:0];        // otherwise
-        end
-    end
 
 	always @* begin  // 6种移位指令
        if(Sftmd)
@@ -95,15 +91,29 @@ module Executs32 (
             3'b010:Sinput = Binput>>Shamt;      // Srl rd,rt,shamt  00010
             3'b100:Sinput = Binput<<Ainput;     // Sllv rd,rt,rs 000100
             3'b110:Sinput = Binput>>Ainput;     // Srlv rd,rt,rs 000110
-            3'b011:Sinput = $signed(Binput)>>>Shamt;     // Sra rd,rt,shamt 00011
-            3'b111:Sinput = $signed(Binput)>>>Ainput;    // Srav rd,rt,rs 00111        
+            3'b011:Sinput = s_Binput>>>Shamt;     // Sra rd,rt,shamt 00011
+            3'b111:Sinput = s_Binput>>>Ainput;    // Srav rd,rt,rs 00111        
             default:Sinput = Binput;
         endcase
        else Sinput = Binput;
     end
  
     assign Add_Result = PC_plus_4[31:0] + {Sign_extend[29:0],2'b00};    // 给取指单元作为beq和bne指令的跳转地址 ？？？
-    
+
+    always @(ALU_ctl or Ainput or Binput) begin //进行算数逻辑运算
+        case(ALU_ctl)
+            3'b000:ALU_output_mux = Ainput & Binput;                    // and,andi
+            3'b001:ALU_output_mux = Ainput | Binput;                    // or,ori
+            3'b010:ALU_output_mux = s_Ainput + s_Binput;                // add,addi,lw,sw,lbu,lb,lj,lhu,sb,sh
+            3'b011:ALU_output_mux = Ainput + Binput;                    // addu,addiu
+            3'b100:ALU_output_mux = Ainput ^ Binput;                    // xor,xori
+            3'b101:ALU_output_mux = ~(Ainput | Binput);                 // nor,lui
+            3'b110:ALU_output_mux = s_Ainput - s_Binput;                // sub,slt,slti,beq,bne
+            3'b111:ALU_output_mux = Ainput - Binput;                    // subu,sltiu,sltu
+            default:ALU_output_mux = 32'h00000000;
+        endcase
+    end
+        
     assign Zero = (ALU_output_mux[31:0]== 32'h00000000) ? 1'b1 : 1'b0;
     assign Positive = (Read_data_1[31]==1'b0&&!Zero);
     assign Negative = Read_data_1[31];
@@ -111,27 +121,21 @@ module Executs32 (
                               (ALU_ctl[2] == 1'b0)
                               ? (Ainput[31] == Binput[31] && Ainput[31] != ALU_output_mux[31])  //同号相加,结果的符号与之相反,则OF=1,否则OF=0
                               : (Ainput[31] != Binput[31] && Binput[31] == ALU_output_mux[31]); //异号相减,结果的符号与减数相同,则OF=1,否则OF=0
-    
-    always @(ALU_ctl or Ainput or Binput) begin //进行算数逻辑运算
-        case(ALU_ctl)
-            3'b000:ALU_output_mux = Ainput & Binput;                    // and,andi
-            3'b001:ALU_output_mux = Ainput | Binput;                    // or,ori
-            3'b010:ALU_output_mux = $signed(Ainput) + $signed(Binput);  // add,addi,lw,sw,lbu,lb,lj,lhu,sb,sh
-            3'b011:ALU_output_mux = Ainput + Binput;                    // addu,addiu
-            3'b100:ALU_output_mux = Ainput ^ Binput;                    // xor,xori
-            3'b101:ALU_output_mux = ~(Ainput | Binput);                 // nor,lui
-            3'b110:ALU_output_mux = $signed(Ainput) - $signed(Binput);  // sub,slt,slti,beq,bne
-            3'b111:ALU_output_mux = Ainput - Binput;                    // subu,sltiu,sltu
-            default:ALU_output_mux = 32'h00000000;
-        endcase
-    end
+//    assign Overflow = ALU_output_mux[32];
     
     reg[31:0]   hi,lo;
     assign mult = (Op==6'b000000&&Func==6'b011000);
     assign multu = (Op==6'b000000&&Func==6'b011001);
     assign div = (Op==6'b000000&&Func==6'b011010);
     assign divu = (Op==6'b000000&&Func==6'b011011);
-  
+    
+    wire [63:0] test1=Ainput*Binput;
+    wire [63:0] test2=s_Ainput*s_Binput;
+    wire [31:0] test31=Ainput/Binput;
+    wire [31:0] test32=Ainput%Binput;
+    wire [31:0] test41=s_Ainput/s_Binput;
+    wire [31:0] test42=s_Ainput%s_Binput;
+    
     // 有符号乘法
     multiplier_signed mul_signed(
         .CLK(clock),
@@ -150,7 +154,7 @@ module Executs32 (
     
     // 有符号除法
     div_signed div_signed(
-        .aclk(clock),                                  
+        //.aclk(clock),                                  // 上升沿              
         .s_axis_divisor_tvalid(DivSel),                // 除数tvalid
         .s_axis_divisor_tdata(Binput),                 
         .s_axis_dividend_tvalid(DivSel),               // 被除数tvalid
@@ -162,7 +166,7 @@ module Executs32 (
     
     // 无符号除法
     div_unsigned div_unsigned(
-        .aclk(clock),                                  
+        //.aclk(clock),                                  
         .s_axis_divisor_tvalid(DivSel),                 // 除数tvalid
         .s_axis_divisor_tdata(Binput),                 
         .s_axis_dividend_tvalid(DivSel),                // 被除数tvalid
@@ -172,7 +176,7 @@ module Executs32 (
         .m_axis_dout_tdata(div_unsigned_result)         // (32{商},32{余数})
     );
     
-    always @* begin  // 乘除运算/mt赋值结果写入HI/LO
+    always @(*) begin  // 乘除运算/mt赋值结果写入HI/LO
          if(Mthi)   hi = Ainput;//(rs)
          else if(Mtlo)  lo = Ainput;
          else if(mult)  {hi,lo} <= mul_signed_result;
@@ -190,13 +194,28 @@ module Executs32 (
          end
     end
     
+//    //always @(posedge clock or negedge reset) begin
+//    always @* begin
+//        if(reset) ALU_Result = 32'd0;
+//        //else if(Waluresult) begin
+//        else begin
+//            if(((ALU_ctl[2:1]==2'b11) && (I_format==1))||((ALU_ctl==3'b111) && (Exe_code[3]==1))) // 所有SLT类
+//                ALU_Result = {31'd0,ALU_output_mux[31]};    // 符号位为1说明(rs)<(rt)
+//            else if((ALU_ctl==3'b101) && (I_format==1))     // lui
+//                ALU_Result[31:0] = {Binput,16'd0};          
+//            else if(Sftmd==1) ALU_Result = Sinput;          // 移位
+//            else  ALU_Result = ALU_output_mux[31:0];        // otherwise
+//        end
+//    end
+    
     always @* begin
         if(Mfhi)
             ALU_Result = hi;
         else if(Mflo)
             ALU_Result = lo;
-        else if(((ALU_ctl==3'b111) && (Exe_code[3]==1))||((ALU_ctl[2:1]==2'b11) && (I_format==1))) //slt,sltu,slti,sltiu 处理所有SLT类的问题
-            ALU_Result = {31'd0,ALU_output_mux[31]};    // 符号位为1说明(rs)<(rt)
+        //else if(((ALU_ctl==3'b111) && (Exe_code[3]==1))||((ALU_ctl[2:1]==2'b11) && (I_format==1))) 
+        else if((ALU_ctl[2:1]==2'b11) && (I_format==1||Exe_code[3]==1)) // slt,sltu,slti,sltiu 处理所有SLT类的问题
+            ALU_Result = {31'd0,ALU_output_mux[32]};    // 符号位为1说明(rs)<(rt)
         else if((ALU_ctl==3'b101) && (I_format==1)) 
             ALU_Result[31:0] = {Binput,16'd0};          // lui data
         else if(Sftmd) ALU_Result = Sinput;             //  移位

@@ -33,7 +33,7 @@ module IF_ID(
     output reg[31:0] ID_instruction  
     );
     
-    always @(posedge cpu_clk) begin
+    always @(negedge cpu_clk or posedge reset) begin
         if(reset)begin
             ID_EX_PC = 32'd0;
             ID_instruction = 32'd0;

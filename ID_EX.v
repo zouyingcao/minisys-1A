@@ -41,6 +41,8 @@ module ID_EX(
     input ID_Sftmd,	
     input ID_DivSel,
     input ID_I_format,
+    input ID_S_format,
+    input ID_L_format,
     input ID_Jr,
     input ID_Jalr,
     input ID_Jmp,
@@ -93,6 +95,8 @@ module ID_EX(
     output reg EX_Sftmd,    
     output reg EX_DivSel,
     output reg EX_I_format,
+    output reg EX_S_format,
+    output reg EX_L_format,
     output reg EX_Jr,
     output reg EX_MEM_Jalr,
     output reg EX_MEM_Jmp,
@@ -129,7 +133,7 @@ module ID_EX(
     output reg EX_MEM_Reserved_instruction
     );
     
-    always @(posedge cpu_clk) begin
+    always @(negedge cpu_clk or posedge reset) begin
         if(reset)begin
             EX_MEM_opcplus4 = 32'd0;
             EX_MEM_PC = 32'd0;
@@ -148,6 +152,8 @@ module ID_EX(
             EX_Sftmd = 1'd0;    
             EX_DivSel = 1'd0;
             EX_I_format = 1'd0;
+            EX_S_format = 1'd0;
+            EX_L_format = 1'd0;
             EX_Jr = 1'd0;
             EX_MEM_Jalr = 1'd0;
             EX_MEM_Jmp = 1'd0;
@@ -201,6 +207,8 @@ module ID_EX(
             EX_Sftmd = 1'd0;    
             EX_DivSel = 1'd0;
             EX_I_format = 1'd0;
+            EX_S_format = 1'd0;
+            EX_L_format = 1'd0;
             EX_Jr = 1'd0;
             EX_MEM_Jalr = 1'd0;
             EX_MEM_Jmp = 1'd0;
@@ -250,9 +258,11 @@ module ID_EX(
             EX_shamt = ID_shamt;
             EX_Sign_extend = ID_Sign_extend;
             EX_RegDst = ID_RegDst;
-            EX_Sftmd = ID_RegDst;    
+            EX_Sftmd = ID_Sftmd;    
             EX_DivSel = ID_DivSel;   
             EX_I_format = ID_I_format;
+            EX_S_format = ID_S_format;
+            EX_L_format = ID_L_format;
             EX_Jr = ID_Jr;
             EX_MEM_Jalr = ID_Jalr;
             EX_MEM_Jmp = ID_Jmp;
