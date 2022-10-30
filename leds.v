@@ -11,7 +11,7 @@ module leds (
     output reg[23:0]ledout		// 向板子上输出的24位LED信号
 );
     
-    always@(posedge led_clk or posedge ledrst) begin
+    always@(negedge led_clk or posedge ledrst) begin
         if(ledrst)
             ledout=24'h000000;
         else if(ledcs&&ledwrite) begin

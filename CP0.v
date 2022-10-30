@@ -56,7 +56,7 @@
     reg [1:0] status_KSU;   // 
                        
     integer i;
-    always @(negedge clock) begin
+    always @(negedge clock or posedge reset) begin
         if(reset) begin // 初始化对cp0寄存器全部赋值0
             for(i=0;i<32;i=i+1)    
                 cp0[i] = 0; 

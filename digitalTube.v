@@ -60,7 +60,7 @@ module digitalTube(
         end
     end
     
-    always @(negedge refresh) begin
+    always @(posedge refresh) begin
         if(choose==8'b10000000)
             choose=8'b00000001;
         else choose=choose<<1;
