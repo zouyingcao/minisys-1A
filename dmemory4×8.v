@@ -64,7 +64,7 @@ module dmemory4x8(
             end
             2'b11:begin 
                 bit_error = (!(ram_adr_i[1:0]==2'b00))&&ram_wen_i;
-                ram_wen = 4'b1111&&{4{ram_wen_i}};
+                ram_wen = {4{ram_wen_i}}; // update
             end 
             default:bit_error = ram_wen_i;// 2'b10
         endcase

@@ -66,7 +66,8 @@ module forwarding(
     // assign ALUSrcB[1] = (EX_ALUSrc == 1)? 1:MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && EX_MEM_waddr!=EX_rt;
     // 不可能出现11的情况
     assign ALUSrcB[0] = EX_MEM_RegWrite && EX_rt==EX_MEM_waddr;
-    assign ALUSrcB[1] = MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && EX_MEM_waddr!=EX_rt;
+    assign ALUSrcB[1] = MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && !(EX_MEM_RegWrite && EX_MEM_waddr==EX_rt);
+
     
     // 用于分支指令源数据
     assign ALUSrcC = 
