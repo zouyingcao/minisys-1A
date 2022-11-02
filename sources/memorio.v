@@ -13,25 +13,25 @@ module memorio (
     output	[31:0]	rdata,			// data from memory or IO that want to read into register
     output	[31:0]	write_data,		// data to memory or I/O
     output	[31:0]	address,		// address to mAddress and I/O
-    output          timerCtrl,      // 2¸ö16Î»¶¨Ê±/¼ÆÊıÆ÷
-    output          keyboardCtrl,   // 4¡Á4¼üÅÌ¿ØÖÆÆ÷
-    output          digtalTubeCtrl, // 8Î»7¶ÎÊıÂë¹Ü
-    output          BuzzerCtrl,     // ·äÃù¹Ü
-    output          WatchdogCtrl,   // ¿´ÃÅ¹·
-    output          PWMCtrl,        // PWMÂö³å¿í¶Èµ÷ÖÆ
+    output          timerCtrl,      // 2ä¸ª16ä½å®šæ—¶/è®¡æ•°å™¨
+    output          keyboardCtrl,   // 4Ã—4é”®ç›˜æ§åˆ¶å™¨
+    output          digtalTubeCtrl, // 8ä½7æ®µæ•°ç ç®¡
+    output          BuzzerCtrl,     // èœ‚é¸£ç®¡
+    output          WatchdogCtrl,   // çœ‹é—¨ç‹—
+    output          PWMCtrl,        // PWMè„‰å†²å®½åº¦è°ƒåˆ¶
     output			LEDCtrl,		// LED CS 
-    output			SwitchCtrl		// Switch CS ²¦Âë¿ª¹Ø
+    output			SwitchCtrl		// Switch CS æ‹¨ç å¼€å…³
 );
    
 	reg[31:0] write_data;
-    wire iorw;                     // ÊÇ·ñÎªIO²Ù×÷
+    wire iorw;                     // æ˜¯å¦ä¸ºIOæ“ä½œ
     
     assign  address = caddress;
-    // Èô¶ÁÈ¡µÄÊı¾İÀ´×ÔIO£¬Ôò½øĞĞÁãÀ©Õ¹
+    // è‹¥è¯»å–çš„æ•°æ®æ¥è‡ªIOï¼Œåˆ™è¿›è¡Œé›¶æ‰©å±•
     assign  rdata = (memread==1) ? mread_data : {16'h0000,ioread_data[15:0]};
     assign  iorw = (iowrite||ioread);
 	
-	// ½Ó¿ÚµÄµØÖ·
+	// æ¥å£çš„åœ°å€
 	assign digtalTubeCtrl = ((iorw==1) && (caddress[31:4] == 28'hFFFFFC0)) ? 1'b1:1'b0;
 	assign keyboardCtrl = ((iorw==1) && (caddress[31:4] == 28'hFFFFFC1)) ? 1'b1:1'b0;
 	assign timerCtrl = ((iorw==1) && (caddress[31:4] == 28'hFFFFFC2)) ? 1'b1:1'b0;
