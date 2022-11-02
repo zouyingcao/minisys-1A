@@ -10,7 +10,7 @@
 // Target Devices: 
 // Tool Versions: 
 // Description: 
-// Âö³å¿í¶Èµ÷ÖÆÆ÷
+// è„‰å†²å®½åº¦è°ƒåˆ¶å™¨
 // Dependencies: 
 // 
 // Revision:
@@ -23,22 +23,22 @@
 module PWM(
     input clock,
     input reset,
-    input write_enable,//Ð´ÐÅºÅ
-    input pwmCtrl,//PWMÆ¬Ñ¡ÐÅºÅ
+    input write_enable,//å†™ä¿¡å·
+    input pwmCtrl,//PWMç‰‡é€‰ä¿¡å·
     input [15:0] write_data_in,
-    input [2:0] address,//µ½PWMÄ£¿éµÄµØÖ·µÍ¶Ë£¨´Ë´¦Îª30/32/34£©
+    input [2:0] address,//åˆ°PWMæ¨¡å—çš„åœ°å€ä½Žç«¯ï¼ˆæ­¤å¤„ä¸º30/32/34ï¼‰
     output reg PWM_output
     );
-    reg [15:0] maximum;     // ×î´óÖµ¼Ä´æÆ÷£¨0XFFFFFC30£©
-    reg [15:0] threshold;   // ¶Ô±È¼Ä´æÆ÷£¨0XFFFFFC32£©
-    reg [15:0] control;     // ¿ØÖÆ¼Ä´æÆ÷£¨0XFFFFFC34£©
-    reg [15:0] counter;     // ¼ÆÊýÆ÷
+    reg [15:0] maximum;     // æœ€å¤§å€¼å¯„å­˜å™¨ï¼ˆ0XFFFFFC30ï¼‰
+    reg [15:0] threshold;   // å¯¹æ¯”å¯„å­˜å™¨ï¼ˆ0XFFFFFC32ï¼‰
+    reg [15:0] control;     // æŽ§åˆ¶å¯„å­˜å™¨ï¼ˆ0XFFFFFC34ï¼‰
+    reg [15:0] counter;     // è®¡æ•°å™¨
     always @(negedge clock)
         begin
            if (pwmCtrl == 0 || reset == 1)
            begin
-               maximum = 16'hFFFF;//¼ÆÊýÆ÷µÄ×î´óÖµ£¨Ä¬ÈÏÎª 0XFFFF£©
-               threshold = 16'h7FFF;//¶Ô±ÈÖµ£¨Ä¬ÈÏÎª 0X7FFF£©
+               maximum = 16'hFFFF;//è®¡æ•°å™¨çš„æœ€å¤§å€¼ï¼ˆé»˜è®¤ä¸º 0XFFFFï¼‰
+               threshold = 16'h7FFF;//å¯¹æ¯”å€¼ï¼ˆé»˜è®¤ä¸º 0X7FFFï¼‰
                counter = 16'h0000;
                control = 16'h0000;
                PWM_output = 1'b1;
@@ -51,7 +51,7 @@ module PWM(
                    3'd4: control = write_data_in;
                endcase
            end
-           else if (control[0] == 1)          //ÔÊÐí¼ÆÊý,µÚ0Î»ÒªÖÃ1£¬±íÊ¾ÔÊÐíPWM³öÊä³ö²¨ÐÎ£¬ÆäËûÎ»Çå0
+           else if (control[0] == 1)          //å…è®¸è®¡æ•°,ç¬¬0ä½è¦ç½®1ï¼Œè¡¨ç¤ºå…è®¸PWMå‡ºè¾“å‡ºæ³¢å½¢ï¼Œå…¶ä»–ä½æ¸…0
            begin
                if (counter >= maximum) begin
                    counter = 16'h0000;
