@@ -23,22 +23,22 @@
 module watchdog(
     input clock,
     input reset,
-    input write_enable,                 // Ğ´ĞÅºÅ
-    input watchdogCtrl,                 // WDTÆ¬Ñ¡ĞÅºÅ
+    input write_enable,                 // å†™ä¿¡å·
+    input watchdogCtrl,                 // WDTç‰‡é€‰ä¿¡å·
     input [15:0] write_data_in,
-    output reg WDT_output               // Í¨ÖªCPU¸´Î»
+    output reg WDT_output               // é€šçŸ¥CPUå¤ä½
     );
-    reg[15:0]   counter;                //¼ÆÊıÆ÷
-    reg[2:0]    mini_cnt;               //Ğ¡¼ÆÊıÆ÷£¬Ê¹µÃ¸´Î»ĞÅºÅ³ÖĞø4¸öÊ±ÖÓ
+    reg[15:0]   counter;                //è®¡æ•°å™¨
+    reg[2:0]    mini_cnt;               //å°è®¡æ•°å™¨ï¼Œä½¿å¾—å¤ä½ä¿¡å·æŒç»­4ä¸ªæ—¶é’Ÿ
     always @(negedge clock) begin
         if (watchdogCtrl == 0 || reset == 1) begin
             counter = 16'hFFFF;
             mini_cnt = 3'b000;
             WDT_output = 1'b0;
         end else begin
-            if (counter == 16'd0) begin //ÒÑ¾­¼ÆÊıµ½0
+            if (counter == 16'd0) begin //å·²ç»è®¡æ•°åˆ°0
                 counter = 16'hFFFF;
-                mini_cnt = 3'b100;      //Ïò CPU ·¢ 4 ¸öÊ±ÖÓÖÜÆÚµÄ RESET ĞÅºÅ
+                mini_cnt = 3'b100;      //å‘ CPU å‘ 4 ä¸ªæ—¶é’Ÿå‘¨æœŸçš„ RESET ä¿¡å·
                 WDT_output = 1'b1;
             end else
                 counter = counter - 1'b1;
