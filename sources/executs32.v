@@ -5,47 +5,47 @@ module Executs32 (
     //
     input           clock,
     input           reset,
-    input           Waluresult,         // Ğ´AluresultµÄĞÅºÅ
+    input           Waluresult,         // å†™Aluresultçš„ä¿¡å·
     //   
     input   [31:0]  PC_plus_4,           // PC+4
-    input	[31:0]	Read_data_1,		// ´ÓÒëÂëµ¥ÔªµÄRead_data_1ÖĞÀ´
-    input	[31:0]	Read_data_2,		// ´ÓÒëÂëµ¥ÔªµÄRead_data_2ÖĞÀ´
-    input   [1:0]   ALUOp,              // À´×Ô¿ØÖÆµ¥ÔªµÄÔËËãÖ¸Áî¿ØÖÆ±àÂë
-    input	[31:0]	Sign_extend,		// ´ÓÒëÂëµ¥ÔªÀ´µÄÀ©Õ¹ºóµÄÁ¢¼´Êı
-    input	[5:0]	Func,	            // È¡Ö¸µ¥ÔªÀ´µÄr-ÀàĞÍÖ¸Áî¹¦ÄÜÂë,r-form instructions[5:0]
-    input	[5:0]	Op,			        // È¡Ö¸µ¥ÔªÀ´µÄ²Ù×÷Âë
-    input	[4:0]	Shamt,				// À´×ÔÈ¡Ö¸µ¥ÔªµÄinstruction[10:6]£¬Ö¸¶¨ÒÆÎ»´ÎÊı
+    input	[31:0]	Read_data_1,		// ä»è¯‘ç å•å…ƒçš„Read_data_1ä¸­æ¥
+    input	[31:0]	Read_data_2,		// ä»è¯‘ç å•å…ƒçš„Read_data_2ä¸­æ¥
+    input   [1:0]   ALUOp,              // æ¥è‡ªæ§åˆ¶å•å…ƒçš„è¿ç®—æŒ‡ä»¤æ§åˆ¶ç¼–ç 
+    input	[31:0]	Sign_extend,		// ä»è¯‘ç å•å…ƒæ¥çš„æ‰©å±•åçš„ç«‹å³æ•°
+    input	[5:0]	Func,	            // å–æŒ‡å•å…ƒæ¥çš„r-ç±»å‹æŒ‡ä»¤åŠŸèƒ½ç ,r-form instructions[5:0]
+    input	[5:0]	Op,			        // å–æŒ‡å•å…ƒæ¥çš„æ“ä½œç 
+    input	[4:0]	Shamt,				// æ¥è‡ªå–æŒ‡å•å…ƒçš„instruction[10:6]ï¼ŒæŒ‡å®šç§»ä½æ¬¡æ•°
     input	[4:0]	address0,		    // rt(i_format)
     input	[4:0]	address1,		    // rd
-    input			Sftmd,				// À´×Ô¿ØÖÆµ¥ÔªµÄ£¬±íÃ÷ÊÇÒÆÎ»Ö¸Áî
+    input			Sftmd,				// æ¥è‡ªæ§åˆ¶å•å…ƒçš„ï¼Œè¡¨æ˜æ˜¯ç§»ä½æŒ‡ä»¤
     input           DivSel,
     input           ALUSrc,
     input	[1:0]	ALUSrcA,			
     input   [1:0]   ALUSrcB,
-    input			I_format,			// À´×Ô¿ØÖÆµ¥Ôª£¬±íÃ÷ÊÇ³ıbeq, bne, LW, SWÖ®ÍâµÄI-ÀàĞÍÖ¸Áî
-    input			Jrn,				// À´×Ô¿ØÖÆµ¥Ôª£¬ÊéÃûÊÇJRÖ¸Áî
+    input			I_format,			// æ¥è‡ªæ§åˆ¶å•å…ƒï¼Œè¡¨æ˜æ˜¯é™¤beq, bne, LW, SWä¹‹å¤–çš„I-ç±»å‹æŒ‡ä»¤
+    input			Jrn,				// æ¥è‡ªæ§åˆ¶å•å…ƒï¼Œä¹¦åæ˜¯JRæŒ‡ä»¤
     input           RegDst,
     
-    input           Mfhi,               //ÊÇ·ñÎª¶ÁĞ´HI/LO¼Ä´æÆ÷µÄÖ¸Áî
+    input           Mfhi,               //æ˜¯å¦ä¸ºè¯»å†™HI/LOå¯„å­˜å™¨çš„æŒ‡ä»¤
     input           Mflo,
     input           Mthi,
     input           Mtlo,            
     
     // forwarding
-    input   [31:0]  EX_MEM_ALU_result,  // ÓëÇ°Ò»ÌõÖ¸Áî´æÔÚĞ´ºó¶ÁÃ°ÏÕ
-    input   [31:0]  WB_data,            // Ö»ÓëÇ°Ç°ÌõÖ¸Áî´æÔÚÃ°ÏÕ
+    input   [31:0]  EX_MEM_ALU_result,  // ä¸å‰ä¸€æ¡æŒ‡ä»¤å­˜åœ¨å†™åè¯»å†’é™©
+    input   [31:0]  WB_data,            // åªä¸å‰å‰æ¡æŒ‡ä»¤å­˜åœ¨å†’é™©
     
-    output			Zero,				// Îª1±íÃ÷¼ÆËãÖµÎª0 
-    output          Positive,           // rsÊÇ·ñÎªÕı
-    output          Negative,           // rsÊÇ·ñÎª¸º
-    output          Overflow,           // ÊÇ·ñ²úÉú¼Ó¼õ·¨Òç³ö
-    output  reg    Divide_zero,        // ÊÇ·ñ³ı0
+    output			Zero,				// ä¸º1è¡¨æ˜è®¡ç®—å€¼ä¸º0 
+    output          Positive,           // rsæ˜¯å¦ä¸ºæ­£
+    output          Negative,           // rsæ˜¯å¦ä¸ºè´Ÿ
+    output          Overflow,           // æ˜¯å¦äº§ç”ŸåŠ å‡æ³•æº¢å‡º
+    output  reg    Divide_zero,        // æ˜¯å¦é™¤0
     
     output  [4:0]   address,   
-    output reg[31:0]ALU_Result,			// ¼ÆËãµÄÊı¾İ½á¹û
+    output reg[31:0]ALU_Result,			// è®¡ç®—çš„æ•°æ®ç»“æœ
     output	[31:0]	rt_value,
     output  [4:0]   rd,
-    output	[31:0]	Add_Result			// ¼ÆËãµÄµØÖ·½á¹û     
+    output	[31:0]	Add_Result			// è®¡ç®—çš„åœ°å€ç»“æœ     
 );
 
     wire[31:0] Ainput,Binput;
@@ -84,7 +84,7 @@ module Executs32 (
     assign address = RegDst ? address1 : address0;
     assign rd = address1;
 
-	always @* begin  // 6ÖÖÒÆÎ»Ö¸Áî
+	always @* begin  // 6ç§ç§»ä½æŒ‡ä»¤
        if(Sftmd)
         case(Func[2:0])
             3'b000:Sinput = Binput<<Shamt;      // Sll rd,rt,shamt  00000
@@ -98,9 +98,9 @@ module Executs32 (
        else Sinput = Binput;
     end
  
-    assign Add_Result = PC_plus_4[31:0] + {Sign_extend[29:0],2'b00};    // ¸øÈ¡Ö¸µ¥Ôª×÷ÎªbeqºÍbneÖ¸ÁîµÄÌø×ªµØÖ· £¿£¿£¿
+    assign Add_Result = PC_plus_4[31:0] + {Sign_extend[29:0],2'b00};    // ç»™å–æŒ‡å•å…ƒä½œä¸ºbeqå’ŒbneæŒ‡ä»¤çš„è·³è½¬åœ°å€ ï¼Ÿï¼Ÿï¼Ÿ
 
-    always @(ALU_ctl or Ainput or Binput) begin //½øĞĞËãÊıÂß¼­ÔËËã
+    always @(ALU_ctl or Ainput or Binput) begin //è¿›è¡Œç®—æ•°é€»è¾‘è¿ç®—
         case(ALU_ctl)
             3'b000:ALU_output_mux = Ainput & Binput;                    // and,andi
             3'b001:ALU_output_mux = Ainput | Binput;                    // or,ori
@@ -117,10 +117,10 @@ module Executs32 (
     assign Zero = (ALU_output_mux[31:0]== 32'h00000000) ? 1'b1 : 1'b0;
     assign Positive = (Read_data_1[31]==1'b0&&!Zero);
     assign Negative = Read_data_1[31];
-    assign Overflow = (ALU_ctl[1:0] != 2'b10) ? 1'b0 : //Èô²»ÊÇÓĞ·ûºÅ¼Ó¼õ£¬Ôò²»²úÉúOverflow
+    assign Overflow = (ALU_ctl[1:0] != 2'b10) ? 1'b0 : //è‹¥ä¸æ˜¯æœ‰ç¬¦å·åŠ å‡ï¼Œåˆ™ä¸äº§ç”ŸOverflow
                               (ALU_ctl[2] == 1'b0)
-                              ? (Ainput[31] == Binput[31] && Ainput[31] != ALU_output_mux[31])  //Í¬ºÅÏà¼Ó,½á¹ûµÄ·ûºÅÓëÖ®Ïà·´,ÔòOF=1,·ñÔòOF=0
-                              : (Ainput[31] != Binput[31] && Binput[31] == ALU_output_mux[31]); //ÒìºÅÏà¼õ,½á¹ûµÄ·ûºÅÓë¼õÊıÏàÍ¬,ÔòOF=1,·ñÔòOF=0
+                              ? (Ainput[31] == Binput[31] && Ainput[31] != ALU_output_mux[31])  //åŒå·ç›¸åŠ ,ç»“æœçš„ç¬¦å·ä¸ä¹‹ç›¸å,åˆ™OF=1,å¦åˆ™OF=0
+                              : (Ainput[31] != Binput[31] && Binput[31] == ALU_output_mux[31]); //å¼‚å·ç›¸å‡,ç»“æœçš„ç¬¦å·ä¸å‡æ•°ç›¸åŒ,åˆ™OF=1,å¦åˆ™OF=0
 //    assign Overflow = ALU_output_mux[32];
     
     reg[31:0]   hi,lo;
@@ -136,7 +136,7 @@ module Executs32 (
     wire [31:0] test41=s_Ainput/s_Binput;
     wire [31:0] test42=s_Ainput%s_Binput;
     
-    // ÓĞ·ûºÅ³Ë·¨
+    // æœ‰ç¬¦å·ä¹˜æ³•
     multiplier_signed mul_signed(
         .CLK(clock),
         .A(Ainput),
@@ -144,7 +144,7 @@ module Executs32 (
         .P(mul_signed_result)
     );
     
-    // ÎŞ·ûºÅ³Ë·¨
+    // æ— ç¬¦å·ä¹˜æ³•
     multiplier_unsigned mul_unsigned(
         .CLK(clock),
         .A(Ainput),
@@ -152,31 +152,31 @@ module Executs32 (
         .P(mul_unsigned_result)
     );
     
-    // ÓĞ·ûºÅ³ı·¨
+    // æœ‰ç¬¦å·é™¤æ³•
     div_signed div_signed(
-        //.aclk(clock),                                  // ÉÏÉıÑØ              
-        .s_axis_divisor_tvalid(DivSel),                // ³ıÊıtvalid
+        //.aclk(clock),                                  // ä¸Šå‡æ²¿              
+        .s_axis_divisor_tvalid(DivSel),                // é™¤æ•°tvalid
         .s_axis_divisor_tdata(Binput),                 
-        .s_axis_dividend_tvalid(DivSel),               // ±»³ıÊıtvalid
+        .s_axis_dividend_tvalid(DivSel),               // è¢«é™¤æ•°tvalid
         .s_axis_dividend_tdata(Ainput),                
-        .m_axis_dout_tvalid(div_dout_tvalid),          // ²úÉú½á¹ûÊ±tvalid±ä1
-        .m_axis_dout_tuser(div_zero),                  // ³ıÁã
-        .m_axis_dout_tdata(div_signed_result)          // (32{ÉÌ},32{ÓàÊı})
+        .m_axis_dout_tvalid(div_dout_tvalid),          // äº§ç”Ÿç»“æœæ—¶tvalidå˜1
+        .m_axis_dout_tuser(div_zero),                  // é™¤é›¶
+        .m_axis_dout_tdata(div_signed_result)          // (32{å•†},32{ä½™æ•°})
     );
     
-    // ÎŞ·ûºÅ³ı·¨
+    // æ— ç¬¦å·é™¤æ³•
     div_unsigned div_unsigned(
         //.aclk(clock),                                  
-        .s_axis_divisor_tvalid(DivSel),                 // ³ıÊıtvalid
+        .s_axis_divisor_tvalid(DivSel),                 // é™¤æ•°tvalid
         .s_axis_divisor_tdata(Binput),                 
-        .s_axis_dividend_tvalid(DivSel),                // ±»³ıÊıtvalid
+        .s_axis_dividend_tvalid(DivSel),                // è¢«é™¤æ•°tvalid
         .s_axis_dividend_tdata(Ainput),                
-        .m_axis_dout_tvalid(divu_dout_tvalid),          // ²úÉú½á¹ûÊ±tvalid±ä1
-        .m_axis_dout_tuser(divu_zero),                  // ³ıÁã
-        .m_axis_dout_tdata(div_unsigned_result)         // (32{ÉÌ},32{ÓàÊı})
+        .m_axis_dout_tvalid(divu_dout_tvalid),          // äº§ç”Ÿç»“æœæ—¶tvalidå˜1
+        .m_axis_dout_tuser(divu_zero),                  // é™¤é›¶
+        .m_axis_dout_tdata(div_unsigned_result)         // (32{å•†},32{ä½™æ•°})
     );
     
-    always @(*) begin  // ³Ë³ıÔËËã/mt¸³Öµ½á¹ûĞ´ÈëHI/LO
+    always @(*) begin  // ä¹˜é™¤è¿ç®—/mtèµ‹å€¼ç»“æœå†™å…¥HI/LO
          if(Mthi)   hi = Ainput;//(rs)
          else if(Mtlo)  lo = Ainput;
          else if(mult)  {hi,lo} <= mul_signed_result;
@@ -199,11 +199,11 @@ module Executs32 (
 //        if(reset) ALU_Result = 32'd0;
 //        //else if(Waluresult) begin
 //        else begin
-//            if(((ALU_ctl[2:1]==2'b11) && (I_format==1))||((ALU_ctl==3'b111) && (Exe_code[3]==1))) // ËùÓĞSLTÀà
-//                ALU_Result = {31'd0,ALU_output_mux[31]};    // ·ûºÅÎ»Îª1ËµÃ÷(rs)<(rt)
+//            if(((ALU_ctl[2:1]==2'b11) && (I_format==1))||((ALU_ctl==3'b111) && (Exe_code[3]==1))) // æ‰€æœ‰SLTç±»
+//                ALU_Result = {31'd0,ALU_output_mux[31]};    // ç¬¦å·ä½ä¸º1è¯´æ˜(rs)<(rt)
 //            else if((ALU_ctl==3'b101) && (I_format==1))     // lui
 //                ALU_Result[31:0] = {Binput,16'd0};          
-//            else if(Sftmd==1) ALU_Result = Sinput;          // ÒÆÎ»
+//            else if(Sftmd==1) ALU_Result = Sinput;          // ç§»ä½
 //            else  ALU_Result = ALU_output_mux[31:0];        // otherwise
 //        end
 //    end
@@ -214,11 +214,11 @@ module Executs32 (
         else if(Mflo)
             ALU_Result = lo;
         //else if(((ALU_ctl==3'b111) && (Exe_code[3]==1))||((ALU_ctl[2:1]==2'b11) && (I_format==1))) 
-        else if((ALU_ctl[2:1]==2'b11) && (I_format==1||Exe_code[3]==1)) // slt,sltu,slti,sltiu ´¦ÀíËùÓĞSLTÀàµÄÎÊÌâ
-            ALU_Result = {31'd0,ALU_output_mux[32]};    // ·ûºÅÎ»Îª1ËµÃ÷(rs)<(rt)
+        else if((ALU_ctl[2:1]==2'b11) && (I_format==1||Exe_code[3]==1)) // slt,sltu,slti,sltiu å¤„ç†æ‰€æœ‰SLTç±»çš„é—®é¢˜
+            ALU_Result = {31'd0,ALU_output_mux[32]};    // ç¬¦å·ä½ä¸º1è¯´æ˜(rs)<(rt)
         else if((ALU_ctl==3'b101) && (I_format==1)) 
             ALU_Result[31:0] = {Binput,16'd0};          // lui data
-        else if(Sftmd) ALU_Result = Sinput;             //  ÒÆÎ»
+        else if(Sftmd) ALU_Result = Sinput;             //  ç§»ä½
         else  ALU_Result = ALU_output_mux[31:0];        // otherwise
     end
 endmodule
