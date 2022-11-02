@@ -10,7 +10,7 @@
 // Target Devices: 
 // Tool Versions: 
 // Description: 
-// Á÷Ë®¼¶ID-EXÖ®¼äµÄ¼Ä´æÆ÷
+// æµæ°´çº§ID-EXä¹‹é—´çš„å¯„å­˜å™¨
 // Dependencies: 
 // 
 // Revision:
@@ -48,7 +48,7 @@ module ID_EX(
     input ID_Jmp,
     input ID_Jal,
     
-    input ID_RegWrite,      //´«È¥EX_MEM
+    input ID_RegWrite,      //ä¼ å»EX_MEM
     input ID_MemIOtoReg,
     input ID_MemWrite,
     input ID_MemRead,
@@ -57,7 +57,7 @@ module ID_EX(
     input ID_Memory_sign,
     input [1:0] ID_Memory_data_width,
     
-    input ID_Beq,             //ËùÓĞ·ÖÖ§
+    input ID_Beq,             //æ‰€æœ‰åˆ†æ”¯
     input ID_Bne,             
     input ID_Bgez,            
     input ID_Bgtz, 
@@ -102,7 +102,7 @@ module ID_EX(
     output reg EX_MEM_Jmp,
     output reg EX_MEM_Jal,
     
-    output reg EX_MEM_RegWrite,      //´«È¥EX_MEM
+    output reg EX_MEM_RegWrite,      //ä¼ å»EX_MEM
     output reg EX_MEM_MemIOtoReg,
     output reg EX_MEM_MemWrite,
     output reg EX_MemRead,
@@ -111,7 +111,7 @@ module ID_EX(
     output reg EX_MEM_Memory_sign,
     output reg [1:0] EX_MEM_Memory_data_width,
     
-    output reg EX_MEM_Beq,             //ËùÓĞ·ÖÖ§
+    output reg EX_MEM_Beq,             //æ‰€æœ‰åˆ†æ”¯
     output reg EX_MEM_Bne,             
     output reg EX_MEM_Bgez,            
     output reg EX_MEM_Bgtz,  
@@ -268,7 +268,7 @@ module ID_EX(
             EX_MEM_Jmp = ID_Jmp;
             EX_MEM_Jal = ID_Jal;
             
-            EX_MEM_RegWrite = ID_RegWrite;      //´«È¥EX_MEM
+            EX_MEM_RegWrite = ID_RegWrite;      //ä¼ å»EX_MEM
             EX_MEM_MemIOtoReg = ID_MemIOtoReg;
             EX_MEM_MemWrite = ID_MemWrite;
             EX_MemRead = ID_MemRead;
