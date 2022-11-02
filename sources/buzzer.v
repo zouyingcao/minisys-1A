@@ -23,8 +23,8 @@
 module buzzer(
     input clock,
     input reset,
-    input write_enable,     // Ğ´ĞÅºÅ
-    input buzzerCtrl,       // ·äÃùÆ÷Æ¬Ñ¡ĞÅºÅ
+    input write_enable,     // å†™ä¿¡å·
+    input buzzerCtrl,       // èœ‚é¸£å™¨ç‰‡é€‰ä¿¡å·
     input [15:0] write_data_in,
     output reg buzzer_output
     );
@@ -33,7 +33,7 @@ module buzzer(
     always @(negedge clock) begin
         if (buzzerCtrl == 0 || reset == 1) begin
             counter = 16'h0000;
-            maximum = 16'hFFFF; // ·äÃùÆ÷³ÖĞøÊ±¼ä
+            maximum = 16'hFFFF; // èœ‚é¸£å™¨æŒç»­æ—¶é—´
             buzzer_output = 1'b0;
         end else if (write_enable) 
             buzzer_output = write_data_in!=32'd0;
