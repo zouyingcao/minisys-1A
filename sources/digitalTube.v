@@ -10,7 +10,7 @@
 // Target Devices: 
 // Tool Versions: 
 // Description: 
-// Í¨³£Ë¢ĞÂÆµÂÊ¿ÉÒÔÉèÖÃÎª 500Hz£¬Ò²¾ÍÊÇ 2ms Ë¢ĞÂÒ»´Î¡£
+// é€šå¸¸åˆ·æ–°é¢‘ç‡å¯ä»¥è®¾ç½®ä¸º 500Hzï¼Œä¹Ÿå°±æ˜¯ 2ms åˆ·æ–°ä¸€æ¬¡ã€‚
 // Dependencies: 
 // 
 // Revision:
@@ -23,20 +23,20 @@
 module digitalTube(
     input clock,
     input reset,
-    input write_enable,             // Ğ´ĞÅºÅ
-    input digitalTubeCtrl,          // ÊıÂë¹ÜÆ¬Ñ¡ĞÅºÅ
-    input [15:0] write_data_in,     // Ğ´µ½ÊıÂë¹ÜµÄÊı¾İ
-    input [2:0] address,            // µ½keyboardÄ£¿éµÄµØÖ·µÍ¶Ë£¨´Ë´¦Îª00/02/04£©
-    output reg[7:0] enable,        // 8Î» Î»Ê¹ÄÜ ĞÅºÅA0-A7£¬µÍµçÆ½ÓĞĞ§
-    output reg[7:0] value          // 8Î» ¶ÎÊ¹ÄÜ ĞÅºÅCA-DP£¬µÍµçÆ½ÓĞĞ§
+    input write_enable,             // å†™ä¿¡å·
+    input digitalTubeCtrl,          // æ•°ç ç®¡ç‰‡é€‰ä¿¡å·
+    input [15:0] write_data_in,     // å†™åˆ°æ•°ç ç®¡çš„æ•°æ®
+    input [2:0] address,            // åˆ°keyboardæ¨¡å—çš„åœ°å€ä½ç«¯ï¼ˆæ­¤å¤„ä¸º00/02/04ï¼‰
+    output reg[7:0] enable,        // 8ä½ ä½ä½¿èƒ½ ä¿¡å·A0-A7ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+    output reg[7:0] value          // 8ä½ æ®µä½¿èƒ½ ä¿¡å·CA-DPï¼Œä½ç”µå¹³æœ‰æ•ˆ
     );
     
-    reg [15:0] lowData;             // µÍËÄÎ»ÊıÂë¹ÜÊı¾İ
-    reg [15:0] highData;            // ¸ßËÄÎ»ÊıÂë¹ÜÊı¾İ
-    reg [15:0] specialDisplay;      // ÌØÊâÏÔÊ¾¼Ä´æÆ÷
+    reg [15:0] lowData;             // ä½å››ä½æ•°ç ç®¡æ•°æ®
+    reg [15:0] highData;            // é«˜å››ä½æ•°ç ç®¡æ•°æ®
+    reg [15:0] specialDisplay;      // ç‰¹æ®Šæ˜¾ç¤ºå¯„å­˜å™¨
     reg [7:0] choose;
     reg [3:0] datatmp;
-    //·ÖÆµ£¬½µµÍË¢ĞÂËÙÂÊ£¬·ñÔò»á³öÏÖÏÔÊ¾²»È«/´íÎóµÄÇé¿ö
+    //åˆ†é¢‘ï¼Œé™ä½åˆ·æ–°é€Ÿç‡ï¼Œå¦åˆ™ä¼šå‡ºç°æ˜¾ç¤ºä¸å…¨/é”™è¯¯çš„æƒ…å†µ
     reg        refresh;
     reg[7:0]   counter;
 
@@ -64,11 +64,11 @@ module digitalTube(
         if(choose==8'b10000000)
             choose=8'b00000001;
         else choose=choose<<1;
-        enable=~(choose&specialDisplay[15:8]); // ÌØÊâÏÔÊ¾¼Ä´æÆ÷µÄ¸ß°ËÎ»±íÊ¾¶ÔÓ¦°Ë¸öÊıÂë¹ÜÒªÏÔÊ¾£¬1±íÊ¾ÒªÏÔÊ¾Êı¾İ
+        enable=~(choose&specialDisplay[15:8]); // ç‰¹æ®Šæ˜¾ç¤ºå¯„å­˜å™¨çš„é«˜å…«ä½è¡¨ç¤ºå¯¹åº”å…«ä¸ªæ•°ç ç®¡è¦æ˜¾ç¤ºï¼Œ1è¡¨ç¤ºè¦æ˜¾ç¤ºæ•°æ®
     end
     always @(choose)
         begin
-            case(choose) // value[0]¼´DP
+            case(choose) // value[0]å³DP
                 8'b00000001:begin datatmp=lowData[3:0];value[0]=~specialDisplay[0];end
                 8'b00000010:begin datatmp=lowData[7:4];value[0]=~specialDisplay[1];end
                 8'b00000100:begin datatmp=lowData[11:8];value[0]=~specialDisplay[2];end
@@ -83,7 +83,7 @@ module digitalTube(
     always @(datatmp)
         begin
             case (datatmp)
-                4'b0000: value[7:1] = 7'b0000001;// CA¡¢CB¡¢CC¡¢¡­¡¢CG,µÍµçÆ½ÓĞĞ§
+                4'b0000: value[7:1] = 7'b0000001;// CAã€CBã€CCã€â€¦ã€CG,ä½ç”µå¹³æœ‰æ•ˆ
                 4'b0001: value[7:1] = 7'b1001111;
                 4'b0010: value[7:1] = 7'b0010010;
                 4'b0011: value[7:1] = 7'b0000110;
