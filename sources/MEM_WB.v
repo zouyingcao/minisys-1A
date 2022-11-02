@@ -31,7 +31,7 @@ module MEM_WB(
     input EX_MEM_Mtlo,
     input [31:0] EX_MEM_opcplus4,
     input [31:0] EX_MEM_PC,
-    input [31:0] MEM_ALU_Result,    // ALU计算的数据结果
+    input [31:0] MEM_ALU_Result,    // ALU录脝脣茫碌脛脢媒戮脻陆谩鹿没
     input [31:0] MEM_MemData,
     input [31:0] EX_MEM_rt_value,
     input [4:0] EX_MEM_waddr,
