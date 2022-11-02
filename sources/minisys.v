@@ -2,36 +2,36 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module minisys ( 
-    input			fpga_rst,	        // °åÉÏµÄResetĞÅºÅ£¬¸ßµçÆ½¸´Î»
-    input			fpga_clk,           // °åÉÏµÄ100MHzÊ±ÖÓĞÅºÅ
-    //2¸ö16Î»¶¨Ê±/¼ÆÊıÆ÷¡¢4¡Á4¼üÅÌ¿ØÖÆÆ÷¡¢8Î»7¶ÎÊıÂë¹Ü¿ØÖÆÆ÷
-    //16Î»LEDÊä³ö¡¢16Î»²¦Âë¿ª¹ØÊäÈë¡¢PWM¿ØÖÆ¡¢¿´ÃÅ¹·¿ØÖÆÆ÷µÄÉè¼Æ
-    input   [3:0]   button,             // ³ıS3ÍâµÄËÄ¸ö°´Å¥¿ª¹Ø£¨S1-S5)
-    input	[23:0]	switch2N4,	        // ²¦Âë¿ª¹ØÊäÈë
-    input   [3:0]   keyboardIn,         // ¼üÅÌÊäÈëÏß(ÁĞÏß)  
-    output  [3:0]   keyboardOut,        // ¼üÅÌÊä³öÏß(ĞĞÏß) 
-    output	[23:0]	led2N4,             // LED½á¹ûÊä³öµ½°åÉÏ
-    output  [7:0]   digitalTube,        // 8Î»7¶ÎÊıÂë¹Ü¿ØÖÆÆ÷
-    output  [7:0]   digitalTubeEnable,  // ÊıÂë¹ÜÊ¹ÄÜĞÅºÅA0-A7(µÍµçÆ½ÓĞĞ§)
-    output          pwmOut,             // PWM¿ØÖÆÆ÷
-    output          wdtOut,             // ¿´ÃÅ¹·
-    output          buzzerOut,          // ·äÃù¹Ü
+    input			fpga_rst,	        // æ¿ä¸Šçš„Resetä¿¡å·ï¼Œé«˜ç”µå¹³å¤ä½
+    input			fpga_clk,           // æ¿ä¸Šçš„100MHzæ—¶é’Ÿä¿¡å·
+    //2ä¸ª16ä½å®šæ—¶/è®¡æ•°å™¨ã€4Ã—4é”®ç›˜æ§åˆ¶å™¨ã€8ä½7æ®µæ•°ç ç®¡æ§åˆ¶å™¨
+    //16ä½LEDè¾“å‡ºã€16ä½æ‹¨ç å¼€å…³è¾“å…¥ã€PWMæ§åˆ¶ã€çœ‹é—¨ç‹—æ§åˆ¶å™¨çš„è®¾è®¡
+    input   [3:0]   button,             // é™¤S3å¤–çš„å››ä¸ªæŒ‰é’®å¼€å…³ï¼ˆS1-S5)
+    input	[23:0]	switch2N4,	        // æ‹¨ç å¼€å…³è¾“å…¥
+    input   [3:0]   keyboardIn,         // é”®ç›˜è¾“å…¥çº¿(åˆ—çº¿)  
+    output  [3:0]   keyboardOut,        // é”®ç›˜è¾“å‡ºçº¿(è¡Œçº¿) 
+    output	[23:0]	led2N4,             // LEDç»“æœè¾“å‡ºåˆ°æ¿ä¸Š
+    output  [7:0]   digitalTube,        // 8ä½7æ®µæ•°ç ç®¡æ§åˆ¶å™¨
+    output  [7:0]   digitalTubeEnable,  // æ•°ç ç®¡ä½¿èƒ½ä¿¡å·A0-A7(ä½ç”µå¹³æœ‰æ•ˆ)
+    output          pwmOut,             // PWMæ§åˆ¶å™¨
+    output          wdtOut,             // çœ‹é—¨ç‹—
+    output          buzzerOut,          // èœ‚é¸£ç®¡
 	// UART Programmer Pinouts
-	input           start_pg,           // ½Ó°åÉÏµÄS3°´¼ü×öÏÂÔØÆô¶¯¼ü
-	input           rx,                 // UART½ÓÊÕ
-	output          tx                  // UART·¢ËÍ
+	input           start_pg,           // æ¥æ¿ä¸Šçš„S3æŒ‰é”®åšä¸‹è½½å¯åŠ¨é”®
+	input           rx,                 // UARTæ¥æ”¶
+	output          tx                  // UARTå‘é€
 );
-    // cpuclk·ÖÆµÆ÷Êä³ö
-    wire cpu_clk;                       // cpu_clk: ·ÖÆµºóÊ±ÖÓ¹©¸øÏµÍ³
-    wire upg_clk;                       // ÓÃÓÚUartµÄclock
+    // cpuclkåˆ†é¢‘å™¨è¾“å‡º
+    wire cpu_clk;                       // cpu_clk: åˆ†é¢‘åæ—¶é’Ÿä¾›ç»™ç³»ç»Ÿ
+    wire upg_clk;                       // ç”¨äºUartçš„clock
 
-    // UART ProgrammerÏà¹Ø
+    // UART Programmerç›¸å…³
     wire upg_clk_o, upg_wen_o, upg_done_o;
     wire [14:0] upg_adr_o;
     wire [31:0] upg_dat_o;  
       
     wire spg_bufg;
-    BUFG U1(.I(start_pg), .O(spg_bufg));// S3°´¼üÈ¥¶¶
+    BUFG U1(.I(start_pg), .O(spg_bufg));// S3æŒ‰é”®å»æŠ–
     
     // Generate UART Programmer reset signal
     reg upg_rst;
@@ -44,14 +44,14 @@ module minisys (
     assign rst = fpga_rst | !upg_rst;
 
     cpuclk cpuclk (
-        .clk_in1         (fpga_clk),    // 100MHz, °åÉÏÊ±ÖÓ
-        .clk_out1        (cpu_clk),     // CPU Clock (22MHz), Ö÷Ê±ÖÓ
-        .clk_out2        (upg_clk)      // UPG Clock (10MHz), ÓÃÓÚ´®¿ÚÏÂÔØ
+        .clk_in1         (fpga_clk),    // 100MHz, æ¿ä¸Šæ—¶é’Ÿ
+        .clk_out1        (cpu_clk),     // CPU Clock (22MHz), ä¸»æ—¶é’Ÿ
+        .clk_out2        (upg_clk)      // UPG Clock (10MHz), ç”¨äºä¸²å£ä¸‹è½½
     );
         
-    uart_bmpg_0 uartpg (                // ´ËÄ£¿éÒÑ¾­½ÓºÃ£¬Ö»×÷Îª´®¿ÚÏÂÔØµÄ¸½¼ş£¬¿É²»È¥¹Ø×¢
+    uart_bmpg_0 uartpg (                // æ­¤æ¨¡å—å·²ç»æ¥å¥½ï¼Œåªä½œä¸ºä¸²å£ä¸‹è½½çš„é™„ä»¶ï¼Œå¯ä¸å»å…³æ³¨
         .upg_clk_i        (upg_clk),    // 10MHz   
-        .upg_rst_i        (upg_rst),    // ¸ßµçÆ½ÓĞĞ§
+        .upg_rst_i        (upg_rst),    // é«˜ç”µå¹³æœ‰æ•ˆ
          // blkram signals
          .upg_clk_o       (upg_clk_o),
          .upg_wen_o       (upg_wen_o),
@@ -63,28 +63,28 @@ module minisys (
          .upg_tx_o        (tx)
     );
     
-    // ³ÌĞòROMµ¥ÔªÊä³ö
-    wire [31:0] rom_dat;                // ¸øÈ¡Ö¸µ¥ÔªµÄÖ¸Áî
+    // ç¨‹åºROMå•å…ƒè¾“å‡º
+    wire [31:0] rom_dat;                // ç»™å–æŒ‡å•å…ƒçš„æŒ‡ä»¤
     
-    // IF¶ÎÊä³ö
-    wire [13:0] rom_adr;                // ¸ø³ÌĞòROMµ¥ÔªµÄÈ¡Ö¸µØÖ·
-    wire [31:0] instruction;            // È¡³öµÄÖ¸Áî
+    // IFæ®µè¾“å‡º
+    wire [13:0] rom_adr;                // ç»™ç¨‹åºROMå•å…ƒçš„å–æŒ‡åœ°å€
+    wire [31:0] instruction;            // å–å‡ºçš„æŒ‡ä»¤
     wire [31:0] opcplus4;               // PC+4
     wire [31:0] pc;                     // PC
     
-    // IF_IDÊä³ö
+    // IF_IDè¾“å‡º
     wire [31:0] id_instruction;         
     wire [31:0] id_opcplus4,id_ex_pc;
     
-    // BranchTestÊä³ö
-    wire nBranch,ifBranch;              // Ô¤²â·ÖÖ§£¬¼ì²âµ½²»·ÖÖ§
-    wire [31:0] if_rs;                  // ÓÃÓÚÌø×ªÖ¸Áî£¬(PC)<-(rs)
+    // BranchTestè¾“å‡º
+    wire nBranch,ifBranch;              // é¢„æµ‹åˆ†æ”¯ï¼Œæ£€æµ‹åˆ°ä¸åˆ†æ”¯
+    wire [31:0] if_rs;                  // ç”¨äºè·³è½¬æŒ‡ä»¤ï¼Œ(PC)<-(rs)
     wire JR,J,if_flush;
     
-    // ControlÊä³ö
+    // Controlè¾“å‡º
     wire regdst;
     wire regwrite;
-    wire iowrite,ioread;	             // I/O¶ÁĞ´ĞÅºÅ
+    wire iowrite,ioread;	             // I/Oè¯»å†™ä¿¡å·
     wire memwrite,memread,memory_sign;
     wire [1:0]memory_data_width;
     wire memoriotoreg;
@@ -99,19 +99,19 @@ module minisys (
     wire break,syscall,eret;
     wire reserved_instruction;
     
-    // idecodeÊä³ö
-    wire [25:0] jump_PC;                // JĞÍÖ¸ÁîÖĞµÄaddress×Ö¶Î
-    wire [31:0] read_data_1;            // ´Ó¼Ä´æÆ÷¶Á³öµÄ(rs)
-    wire [31:0] read_data_2;            // ´Ó¼Ä´æÆ÷¶Á³öµÄ(rt)
-    wire [31:0] write_register_data;    // ÒªĞ´Èë¼Ä´æÆ÷µÄÊı¾İ
+    // idecodeè¾“å‡º
+    wire [25:0] jump_PC;                // Jå‹æŒ‡ä»¤ä¸­çš„addresså­—æ®µ
+    wire [31:0] read_data_1;            // ä»å¯„å­˜å™¨è¯»å‡ºçš„(rs)
+    wire [31:0] read_data_2;            // ä»å¯„å­˜å™¨è¯»å‡ºçš„(rt)
+    wire [31:0] write_register_data;    // è¦å†™å…¥å¯„å­˜å™¨çš„æ•°æ®
     wire [4:0] addr0,addr1,rs;          // rt,rd,rs
-    wire [31:0] sign_extend;            // Á¢¼´Êı·ûºÅÀ©Õ¹
+    wire [31:0] sign_extend;            // ç«‹å³æ•°ç¬¦å·æ‰©å±•
     
-    // hazardÊä³ö
-    wire pcwrite;                       // ½â¾öload-useÃ°ÏÕ
+    // hazardè¾“å‡º
+    wire pcwrite;                       // è§£å†³load-useå†’é™©
     wire id_ex_stall;             
           
-    // ID_EXÊä³ö
+    // ID_EXè¾“å‡º
     wire [31:0] ex_mem_opcplus4,ex_mem_pc,ex_dataA,ex_dataB,ex_sign_extend;
     wire [1:0] ex_aluop;
     wire ex_alusrc;
@@ -125,17 +125,17 @@ module minisys (
     wire ex_mem_mfhi,ex_mem_mflo,ex_mem_mtlo,ex_mem_mthi;
     wire ex_mem_mfc0,ex_mem_mtc0,ex_mem_syscall,ex_mem_break,ex_mem_eret,ex_mem_reserved_instruction;
     
-    // forwardingÊä³ö
+    // forwardingè¾“å‡º
     wire [1:0] ex_alusrcA,ex_alusrcB,alusrcC,alusrcD;
     
-    // EX¶ÎÊä³ö
+    // EXæ®µè¾“å‡º
     wire [4:0] ex_address,rd;
     wire [31:0] rt_value;
     wire [31:0] add_result;	             // PC+4+offset<<2
-    wire [31:0] alu_result;	             // ALUÔËËã½á¹û
+    wire [31:0] alu_result;	             // ALUè¿ç®—ç»“æœ
     wire zero,positive,negative,overflow,div_zero;
 	
-	// EX_MEMÊä³ö
+	// EX_MEMè¾“å‡º
     wire mem_wb_zero,mem_wb_positive,mem_wb_negative;
     wire mem_wb_jmp,mem_wb_jal,mem_wb_jr,mem_wb_jalr;
     wire mem_wb_beq,mem_wb_bne,mem_wb_bgez,mem_wb_bgtz,mem_wb_blez,mem_wb_bltz,mem_wb_bgezal,mem_wb_bltzal;
@@ -146,20 +146,20 @@ module minisys (
 	wire [31:0] mem_wb_opcplus4,mem_wb_pc,mem_aluresult,mem_dataB;
 	wire [4:0] mem_wb_waddr,mem_wb_rd;
 	
-	// memorioÊä³ö
+	// memorioè¾“å‡º
 	wire [31:0] address;               // address to DMEM
-    wire [31:0] rdata;                 // ¶ÁRAM»òIOµÄÊı¾İ
-    wire [31:0] write_data;	            // Ğ´RAM»òIOµÄÊı¾İ
+    wire [31:0] rdata;                 // è¯»RAMæˆ–IOçš„æ•°æ®
+    wire [31:0] write_data;	            // å†™RAMæˆ–IOçš„æ•°æ®
 	wire switchctrl,keyboardctrl,timerctrl;
     wire ledctrl,digitaltubectrl,buzzerctrl,pwmctrl,wdtctrl;
     
-	// ioreadÊä³ö
-	wire [15:0] ioread_data;           // ¶ÁIOµÄÊı¾İ
+	// ioreadè¾“å‡º
+	wire [15:0] ioread_data;           // è¯»IOçš„æ•°æ®
 	    
-	// DataMemoryÊä³ö
-    wire [31:0] mem_data_out;	        // RAMÖĞ¶ÁÈ¡µÄÊı¾İ
+	// DataMemoryè¾“å‡º
+    wire [31:0] mem_data_out;	        // RAMä¸­è¯»å–çš„æ•°æ®
 	
-	// MEM_WBÊä³ö
+	// MEM_WBè¾“å‡º
     wire [4:0] wb_waddr,cp0_rd;
     wire wb_regwrite,wb_memoriotoreg;
     wire wb_mfhi,wb_mflo,wb_mtlo,wb_mthi;
@@ -167,11 +167,11 @@ module minisys (
     wire [31:0] wb_opcplus4,wb_pc,wb_aluresult,wb_memdata,cp0_rt_value;
     wire wb_mfc0,wb_mtc0,wb_overflow,wb_divide_zero,wb_syscall,wb_break,wb_eret,wb_reserved_instruction;
         
-    // WB¶ÎÊä³ö
+    // WBæ®µè¾“å‡º
     wire [31:0] wb_data;
 	wire [31:0] cp0_data;
 	
-	// ½Ó¿ÚÏà¹Ø
+	// æ¥å£ç›¸å…³
     wire ctc0_output,ctc1_output;
     wire [15:0] ioread_data_keyboard,ioread_data_switch,ioread_data_timer;
 	
@@ -180,14 +180,14 @@ module minisys (
 	wire wir;
 	wire waluresult;
 	
-	// Ö¸Áî´æ´¢Æ÷IMEM:ÊäÈëPC£¬¶Á³öÖ¸Áî
+	// æŒ‡ä»¤å­˜å‚¨å™¨IMEM:è¾“å…¥PCï¼Œè¯»å‡ºæŒ‡ä»¤
 	programrom ROM (
 		// Program ROM Pinouts
-		.rom_clk_i		(cpu_clk),	    // ¸øCPUµÄ22MHzµÄÖ÷Ê±ÖÓ
-		.rom_adr_i		(rom_adr),		// È¡Ö¸µ¥Ôª¸øROMµÄµØÖ·£¨PC/4£©
-		.Jpadr			(rom_dat),	    // ROMÖĞ¶ÁµÄÊı¾İ£¨Ö¸Áî£©output
-		// UART Programmer Pinouts, ÒÔÏÂÊÇ´®¿ÚÏÂÔØËùÓÃ£¬¿É²»±Ø¹Ø×¢
-		.upg_rst_i		(upg_rst),		// UPG reset (¸ßµçÆ½ÓĞĞ§)
+		.rom_clk_i		(cpu_clk),	    // ç»™CPUçš„22MHzçš„ä¸»æ—¶é’Ÿ
+		.rom_adr_i		(rom_adr),		// å–æŒ‡å•å…ƒç»™ROMçš„åœ°å€ï¼ˆPC/4ï¼‰
+		.Jpadr			(rom_dat),	    // ROMä¸­è¯»çš„æ•°æ®ï¼ˆæŒ‡ä»¤ï¼‰output
+		// UART Programmer Pinouts, ä»¥ä¸‹æ˜¯ä¸²å£ä¸‹è½½æ‰€ç”¨ï¼Œå¯ä¸å¿…å…³æ³¨
+		.upg_rst_i		(upg_rst),		// UPG reset (é«˜ç”µå¹³æœ‰æ•ˆ)
 		.upg_clk_i		(upg_clk_o),	// UPG clock (10MHz)
 		.upg_wen_i		(upg_wen_o & !upg_adr_o[14]),	// UPG write enable
 		.upg_adr_i		(upg_adr_o[13:0]),	// UPG write address
@@ -195,7 +195,7 @@ module minisys (
 		.upg_done_i		(upg_done_o)	    // 1 if programming is finished
 	);
 
-    // È¡Ö¸µ¥Ôª
+    // å–æŒ‡å•å…ƒ
     Ifetc32 ifetch(
         //.Wpc(wpc),
         //.Wir(wir),
@@ -203,7 +203,7 @@ module minisys (
         .clock          (cpu_clk),     
         .PCWrite        (pcwrite),
         
-        .Read_data_1    (if_rs),        // (rs)×¢Òâ£¡£¡£¡
+        .Read_data_1    (if_rs),        // (rs)æ³¨æ„ï¼ï¼ï¼
         .Jump_PC        (jump_PC),      // ((Zero-Extend) address<<2)
         .J              (J),
         .JR             (JR),
@@ -216,15 +216,15 @@ module minisys (
         .Instruction    (instruction),
 		// ROM Pinouts
 		.rom_adr_o		(rom_adr),
-		.Jpadr			(rom_dat),   // ³ÌĞòROMÊä³öµÄÖ¸Áî
+		.Jpadr			(rom_dat),   // ç¨‹åºROMè¾“å‡ºçš„æŒ‡ä»¤
 		//
 		.interrupt_PC   (),
         .flush          ()
     );
     
     branchTest branchTest(
-        .IF_op          (rom_dat[31:26]), // ´Ó¶øÓëifetchÍ¬²½
-        //ÓĞÌõ¼şÌø×ª ID¶Î
+        .IF_op          (rom_dat[31:26]), // ä»è€Œä¸ifetchåŒæ­¥
+        //æœ‰æ¡ä»¶è·³è½¬ IDæ®µ
         .Beq            (beq),
         .Bne            (bne),
         .Bgez           (bgez),
@@ -271,7 +271,7 @@ module minisys (
        .ID_instruction  (id_instruction)        
     );
     
-    //¿ØÖÆµ¥Ôª
+    //æ§åˆ¶å•å…ƒ
     control32 control(
         // new
         //.clock           (cpu_clk),
@@ -445,7 +445,7 @@ module minisys (
         .EX_MEM_Jal     (ex_mem_jal),
         .EX_MEM_Jalr    (ex_mem_jalr),
     
-        .EX_MEM_RegWrite(ex_mem_regwrite),      //´«È¥EX_MEM
+        .EX_MEM_RegWrite(ex_mem_regwrite),      //ä¼ å»EX_MEM
         //.EX_MEM_MemIOtoReg(ex_mem_memoriotoreg),
         //.EX_MEM_MemWrite(ex_mem_memwrite),
         //.EX_MemRead     (ex_memread),
@@ -481,9 +481,9 @@ module minisys (
         .EX_rt          (ex_address0),      // rt
         .EX_Mflo        (ex_mem_mflo),
         .EX_Mfhi        (ex_mem_mfhi),
-        //.EX_ALUSrc      (ex_alusrc),        // ÊÇ·ñÑ¡ÔñÀ©Õ¹ºóµÄÁ¢¼´Êı
+        //.EX_ALUSrc      (ex_alusrc),        // æ˜¯å¦é€‰æ‹©æ‰©å±•åçš„ç«‹å³æ•°
         
-        .ID_rs          (rs),		        // ID¶Î
+        .ID_rs          (rs),		        // IDæ®µ
         .ID_rt          (addr0),            
         .ID_Mflo        (mflo),
         .ID_Mfhi        (mfhi),
@@ -494,7 +494,7 @@ module minisys (
         .ID_EX_Mtlo     (ex_mem_mtlo),
         .ID_EX_Mthi     (ex_mem_mthi),  
         
-        //´¦ÀíÊı¾İ×ª·¢
+        //å¤„ç†æ•°æ®è½¬å‘
         .EX_MEM_RegWrite(mem_wb_regwrite),
         .EX_MEM_waddr   (mem_wb_waddr),
         .EX_MEM_Mtlo    (mem_wb_mtlo),
@@ -670,14 +670,14 @@ module minisys (
         .mread_data     (mem_data_out),
         .ioread_data    (ioread_data),
         .wdata          (mem_dataB),
-        .rdata          (rdata),                // ouput,mread_dataÓëioread_dataÑ¡ÆäÒ»
+        .rdata          (rdata),                // ouput,mread_dataä¸ioread_dataé€‰å…¶ä¸€
         .write_data     (write_data),
-        .timerCtrl      (timerctrl),            // 2¸ö16Î»¶¨Ê±/¼ÆÊıÆ÷
-        .keyboardCtrl   (keyboardctrl),         // 4¡Á4¼üÅÌ¿ØÖÆÆ÷
-        .digtalTubeCtrl (digitaltubectrl),       // 8Î»7¶ÎÊıÂë¹Ü
-        .BuzzerCtrl     (buzzerctrl),           // ·äÃù¹Ü
-        .WatchdogCtrl   (wdtctrl),              // ¿´ÃÅ¹·
-        .PWMCtrl        (pwmctrl),              // PWMÂö³å¿í¶Èµ÷ÖÆ
+        .timerCtrl      (timerctrl),            // 2ä¸ª16ä½å®šæ—¶/è®¡æ•°å™¨
+        .keyboardCtrl   (keyboardctrl),         // 4Ã—4é”®ç›˜æ§åˆ¶å™¨
+        .digtalTubeCtrl (digitaltubectrl),       // 8ä½7æ®µæ•°ç ç®¡
+        .BuzzerCtrl     (buzzerctrl),           // èœ‚é¸£ç®¡
+        .WatchdogCtrl   (wdtctrl),              // çœ‹é—¨ç‹—
+        .PWMCtrl        (pwmctrl),              // PWMè„‰å†²å®½åº¦è°ƒåˆ¶
         .LEDCtrl        (ledctrl),
         .SwitchCtrl     (switchctrl)
     );
@@ -696,10 +696,10 @@ module minisys (
   
     dmemory4x8 memory (
         .ram_clk_i		(cpu_clk),
-        .ram_wen_i	    (mem_memwrite),			// À´×Ô¿ØÖÆµ¥Ôª
-        .ram_adr_i		(address[15:0]),	    // À´×ÔmemorioÄ£¿é£¬Ô´Í·ÊÇÀ´×ÔÖ´ĞĞµ¥ÔªËã³öµÄalu_result
-        .ram_dat_i		(write_data),		    // À´×ÔÒëÂëµ¥ÔªµÄread_data2
-        .ram_dat_o		(mem_data_out),		    // ´Ó´æ´¢Æ÷ÖĞ»ñµÃµÄÊı¾İ
+        .ram_wen_i	    (mem_memwrite),			// æ¥è‡ªæ§åˆ¶å•å…ƒ
+        .ram_adr_i		(address[15:0]),	    // æ¥è‡ªmemorioæ¨¡å—ï¼Œæºå¤´æ˜¯æ¥è‡ªæ‰§è¡Œå•å…ƒç®—å‡ºçš„alu_result
+        .ram_dat_i		(write_data),		    // æ¥è‡ªè¯‘ç å•å…ƒçš„read_data2
+        .ram_dat_o		(mem_data_out),		    // ä»å­˜å‚¨å™¨ä¸­è·å¾—çš„æ•°æ®
 		.ram_dat_width  (mem_memory_data_width),
 		.ram_sign       (mem_memory_sign),
 		// UART Programmer Pinouts
@@ -797,7 +797,7 @@ module minisys (
     );
     
 	wb wb(
-        .read_data      (wb_memdata),    //´ÓDATA RAM or I/O portÈ¡³öµÄÊı¾İ
+        .read_data      (wb_memdata),    //ä»DATA RAM or I/O portå–å‡ºçš„æ•°æ®
         .ALU_result     (wb_aluresult),
         .cp0_data_in    (cp0_data),
         .Mfc0           (wb_mfc0),
@@ -822,7 +822,7 @@ module minisys (
         .switchread     (mem_ioread && switchctrl),
         .switchaddr     (address[1:0]),
         .switchcs       (switchctrl),
-        .switch_i       (switch2N4),//input,´Ó°åÉÏ¶ÁµÄ24Î»¿ª¹ØÊı¾İ
+        .switch_i       (switch2N4),//input,ä»æ¿ä¸Šè¯»çš„24ä½å¼€å…³æ•°æ®
         .switchrdata    (ioread_data_switch)//output
     );
 
