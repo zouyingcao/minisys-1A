@@ -19,16 +19,16 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// ¿É¿¼ÂÇ½»²æ´æ´¢Æ÷µÄÉè¼Æ£¬±ãÓÚ×Ö½Ú·ÃÎÊ¡¢°ë×Ö·ÃÎÊºÍ×Ö·ÃÎÊ
+// å¯è€ƒè™‘äº¤å‰å­˜å‚¨å™¨çš„è®¾è®¡ï¼Œä¾¿äºå­—èŠ‚è®¿é—®ã€åŠå­—è®¿é—®å’Œå­—è®¿é—®
 module dmemory4x8(
     input			ram_clk_i,
-    input			ram_wen_i,		// À´×Ô¿ØÖÆµ¥Ôª
+    input			ram_wen_i,		// æ¥è‡ªæ§åˆ¶å•å…ƒ
     input   [1:0]   ram_dat_width,
     input           ram_sign,
-    input	[15:0]	ram_adr_i,		// À´×ÔmemorioÄ£¿é£¬Ô´Í·ÊÇÀ´×ÔÖ´ĞĞµ¥ÔªËã³öµÄalu_result,´æ´¢µØÖ·
-    input	[31:0]	ram_dat_i,		// À´×ÔÒëÂëµ¥ÔªµÄread_data2
+    input	[15:0]	ram_adr_i,		// æ¥è‡ªmemorioæ¨¡å—ï¼Œæºå¤´æ˜¯æ¥è‡ªæ‰§è¡Œå•å…ƒç®—å‡ºçš„alu_result,å­˜å‚¨åœ°å€
+    input	[31:0]	ram_dat_i,		// æ¥è‡ªè¯‘ç å•å…ƒçš„read_data2
     output   reg   bit_error,
-    output reg[31:0]ram_dat_o,		// ´Ó´æ´¢Æ÷ÖĞ»ñµÃµÄÊı¾İ
+    output reg[31:0]ram_dat_o,		// ä»å­˜å‚¨å™¨ä¸­è·å¾—çš„æ•°æ®
 	// UART Programmer Pinouts
 	input           upg_rst_i,      // UPG reset (Active High)
 	input           upg_clk_i,      // UPG ram_clk_i (10MHz)
@@ -38,11 +38,11 @@ module dmemory4x8(
 	input           upg_done_i      // 1 if programming is finished
     );
     
-    wire ram_clk = ram_clk_i;	    // ÒòÎªÊ¹ÓÃBlock ramµÄ¹ÌÓĞÑÓ³Ù£¬RAMµÄµØÖ·ÏßÀ´²»¼°ÔÚÊ±ÖÓÉÏÉıÑØ×¼±¸ºÃ,
-                                    // Ê¹µÃÊ±ÖÓÉÏÉıÑØÊı¾İ¶Á³öÓĞÎó£¬ËùÒÔ²ÉÓÃ·´ÏàÊ±ÖÓ£¬Ê¹µÃ¶Á³öÊı¾İ±ÈµØÖ·×¼
-                                    // ±¸ºÃÒªÍí´óÔ¼°ë¸öÊ±ÖÓ£¬´Ó¶øµÃµ½ÕıÈ·µØÖ·¡£
+    wire ram_clk = ram_clk_i;	    // å› ä¸ºä½¿ç”¨Block ramçš„å›ºæœ‰å»¶è¿Ÿï¼ŒRAMçš„åœ°å€çº¿æ¥ä¸åŠåœ¨æ—¶é’Ÿä¸Šå‡æ²¿å‡†å¤‡å¥½,
+                                    // ä½¿å¾—æ—¶é’Ÿä¸Šå‡æ²¿æ•°æ®è¯»å‡ºæœ‰è¯¯ï¼Œæ‰€ä»¥é‡‡ç”¨åç›¸æ—¶é’Ÿï¼Œä½¿å¾—è¯»å‡ºæ•°æ®æ¯”åœ°å€å‡†
+                                    // å¤‡å¥½è¦æ™šå¤§çº¦åŠä¸ªæ—¶é’Ÿï¼Œä»è€Œå¾—åˆ°æ­£ç¡®åœ°å€ã€‚
                                  
-    // kickOff = 1µÄÊ±ºòCPU Õı³£¹¤×÷£¬·ñÔò¾ÍÊÇ´®¿ÚÏÂÔØ³ÌĞò¡£
+    // kickOff = 1çš„æ—¶å€™CPU æ­£å¸¸å·¥ä½œï¼Œå¦åˆ™å°±æ˜¯ä¸²å£ä¸‹è½½ç¨‹åºã€‚
     wire kickOff = upg_rst_i | (~upg_rst_i & upg_done_i);
     reg [3:0] ram_wen;
     wire [7:0] ram_data0,ram_data1,ram_data2,ram_data3;
@@ -59,8 +59,8 @@ module dmemory4x8(
             end
             2'b01:begin
                 bit_error = ram_adr_i[0]&&ram_wen_i;
-                ram_wen[1:0] = {2{(ram_adr_i[1]==1'b0)&&ram_wen_i}};//¶ÁĞ´RAM #0, #1
-                ram_wen[3:2] = {2{(ram_adr_i[1]==1'b1)&&ram_wen_i}};//¶ÁĞ´RAM #2, #3
+                ram_wen[1:0] = {2{(ram_adr_i[1]==1'b0)&&ram_wen_i}};//è¯»å†™RAM #0, #1
+                ram_wen[3:2] = {2{(ram_adr_i[1]==1'b1)&&ram_wen_i}};//è¯»å†™RAM #2, #3
             end
             2'b11:begin 
                 bit_error = (!(ram_adr_i[1:0]==2'b00))&&ram_wen_i;
