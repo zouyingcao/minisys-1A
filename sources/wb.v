@@ -21,8 +21,8 @@
 
 
 module wb(
-    input  [31:0]	read_data,		// ´ÓDATA RAM or I/O portÈ¡³öµÄÊı¾İ
-    input  [31:0]   ALU_result,     // ´ÓÖ´ĞĞµ¥ÔªÀ´µÄÔËËãµÄ½á¹û£¬ĞèÒªÀ©Õ¹Á¢¼´Êıµ½32Î»
+    input  [31:0]	read_data,		// ä»DATA RAM or I/O portå–å‡ºçš„æ•°æ®
+    input  [31:0]   ALU_result,     // ä»æ‰§è¡Œå•å…ƒæ¥çš„è¿ç®—çš„ç»“æœï¼Œéœ€è¦æ‰©å±•ç«‹å³æ•°åˆ°32ä½
     input  [31:0]   cp0_data_in,
     input           MemIOtoReg,  
     input           Mfc0,      
