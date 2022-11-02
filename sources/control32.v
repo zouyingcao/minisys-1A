@@ -5,30 +5,30 @@ module control32 (
     input           clock,
     input           reset,
     input           Zero,
-    output reg[1:0] Wpc,                //Îª1ĞèÒªĞŞ¸ÄPCµÄĞ´ĞÅºÅ
-    output          Wir,                //ĞèÒªĞ´IRµÄĞÅºÅ
-    output          Waluresult,         //Ğ´aluresultµÄĞÅºÅ
+    output reg[1:0] Wpc,                //ä¸º1éœ€è¦ä¿®æ”¹PCçš„å†™ä¿¡å·
+    output          Wir,                //éœ€è¦å†™IRçš„ä¿¡å·
+    output          Waluresult,         //å†™aluresultçš„ä¿¡å·
     // 
     input   [31:0]  Instruction,
     input           s_format,
     input           l_format,
-    input   [21:0]  Alu_resultHigh,     // ¶Á²Ù×÷ĞèÒª´Ó¶Ë¿Ú»ò´æ´¢Æ÷¶ÁÊı¾İµ½¼Ä´æÆ÷,LWºÍSWµÄÕæÕıµØÖ·ÎªAlu_Result,Alu_resultHigh = Alu_result[31:10];
-    output			RegDST,				// Îª1±íÃ÷Ä¿µÄ¼Ä´æÆ÷ÊÇrd£¬·ñÔòÄ¿µÄ¼Ä´æÆ÷ÊÇrt
-    output			ALUSrc,				// Îª1±íÃ÷µÚ¶ş¸ö²Ù×÷ÊıÊÇÁ¢¼´Êı£¨beq£¬bne³ıÍâ£©
-    output			MemIOtoReg,			// Îª1±íÃ÷ĞèÒª´Ó´æ´¢Æ÷¶ÁÊı¾İµ½¼Ä´æÆ÷
-    output			RegWrite,			// Îª1±íÃ÷¸ÃÖ¸ÁîĞèÒªĞ´¼Ä´æÆ÷
-    output			MemWrite,			// Îª1±íÃ÷¸ÃÖ¸ÁîĞèÒªĞ´´æ´¢Æ÷,swÇÒAlu_resultHigh²»µÈÓÚÈ«1(È«1±íÊ¾IO£©
-    output          MemRead,            // ´æ´¢Æ÷¶Á
-    output          IORead,             // IO¶Á
-    output          IOWrite,            // IOĞ´
+    input   [21:0]  Alu_resultHigh,     // è¯»æ“ä½œéœ€è¦ä»ç«¯å£æˆ–å­˜å‚¨å™¨è¯»æ•°æ®åˆ°å¯„å­˜å™¨,LWå’ŒSWçš„çœŸæ­£åœ°å€ä¸ºAlu_Result,Alu_resultHigh = Alu_result[31:10];
+    output			RegDST,				// ä¸º1è¡¨æ˜ç›®çš„å¯„å­˜å™¨æ˜¯rdï¼Œå¦åˆ™ç›®çš„å¯„å­˜å™¨æ˜¯rt
+    output			ALUSrc,				// ä¸º1è¡¨æ˜ç¬¬äºŒä¸ªæ“ä½œæ•°æ˜¯ç«‹å³æ•°ï¼ˆbeqï¼Œbneé™¤å¤–ï¼‰
+    output			MemIOtoReg,			// ä¸º1è¡¨æ˜éœ€è¦ä»å­˜å‚¨å™¨è¯»æ•°æ®åˆ°å¯„å­˜å™¨
+    output			RegWrite,			// ä¸º1è¡¨æ˜è¯¥æŒ‡ä»¤éœ€è¦å†™å¯„å­˜å™¨
+    output			MemWrite,			// ä¸º1è¡¨æ˜è¯¥æŒ‡ä»¤éœ€è¦å†™å­˜å‚¨å™¨,swä¸”Alu_resultHighä¸ç­‰äºå…¨1(å…¨1è¡¨ç¤ºIOï¼‰
+    output          MemRead,            // å­˜å‚¨å™¨è¯»
+    output          IORead,             // IOè¯»
+    output          IOWrite,            // IOå†™
     
-    output			Jmp,				// Îª1±íÃ÷ÊÇJÖ¸Áî
-    output			Jal,				// Îª1±íÃ÷ÊÇJalÖ¸Áî
-    output          Jrn,                // Îª1±íÃ÷µ±Ç°Ö¸ÁîÊÇjr
+    output			Jmp,				// ä¸º1è¡¨æ˜æ˜¯JæŒ‡ä»¤
+    output			Jal,				// ä¸º1è¡¨æ˜æ˜¯JalæŒ‡ä»¤
+    output          Jrn,                // ä¸º1è¡¨æ˜å½“å‰æŒ‡ä»¤æ˜¯jr
     output          Jalr,               // Jalr
     
-    output          Beq,                // Îª1±íÃ÷ÊÇBeqÖ¸Áî,Ô­ÎªBranch
-    output          Bne,                // Îª1±íÃ÷ÊÇBneÖ¸Áî,Ô­ÎªnBranch
+    output          Beq,                // ä¸º1è¡¨æ˜æ˜¯BeqæŒ‡ä»¤,åŸä¸ºBranch
+    output          Bne,                // ä¸º1è¡¨æ˜æ˜¯BneæŒ‡ä»¤,åŸä¸ºnBranch
     output          Bgez,
     output          Bgtz,
     output          Blez,
@@ -43,30 +43,30 @@ module control32 (
     output          Mtlo,
     output          Mtc0,
     
-    output			I_format,			// Îª1±íÃ÷¸ÃÖ¸ÁîÊÇ³ıbeq£¬bne£¬LW£¬SWÖ®ÍâµÄÆäËûI-ÀàĞÍÖ¸Áî
-    output          S_format,           // ±íÊ¾Ğ´´æ´¢Æ÷
-    output          L_format,           // ±íÊ¾´Ó´æ´¢Æ÷¶Á³öÊı¾İ
-    output			Sftmd,				// Îª1±íÃ÷ÊÇÒÆÎ»Ö¸Áî
+    output			I_format,			// ä¸º1è¡¨æ˜è¯¥æŒ‡ä»¤æ˜¯é™¤beqï¼Œbneï¼ŒLWï¼ŒSWä¹‹å¤–çš„å…¶ä»–I-ç±»å‹æŒ‡ä»¤
+    output          S_format,           // è¡¨ç¤ºå†™å­˜å‚¨å™¨
+    output          L_format,           // è¡¨ç¤ºä»å­˜å‚¨å™¨è¯»å‡ºæ•°æ®
+    output			Sftmd,				// ä¸º1è¡¨æ˜æ˜¯ç§»ä½æŒ‡ä»¤
     output          DivSel,
-    output	[1:0]	ALUOp,				// ÊÇR-ÀàĞÍ»òI_format=1Ê±Î»1Îª1, beq¡¢bneÖ¸ÁîÔòÎ»0Îª1
-    output          Memory_sign,        // lb/lbu/lh/lhuµÄ´¦Àí
-    output  [1:0]   Memory_data_width,  // ¶ÁĞ´´æ´¢Æ÷µÄÊı¾İ¿í¶È(00/01/11)
-    //ÖĞ¶Ï/Òì³£Ïà¹Ø
+    output	[1:0]	ALUOp,				// æ˜¯R-ç±»å‹æˆ–I_format=1æ—¶ä½1ä¸º1, beqã€bneæŒ‡ä»¤åˆ™ä½0ä¸º1
+    output          Memory_sign,        // lb/lbu/lh/lhuçš„å¤„ç†
+    output  [1:0]   Memory_data_width,  // è¯»å†™å­˜å‚¨å™¨çš„æ•°æ®å®½åº¦(00/01/11)
+    //ä¸­æ–­/å¼‚å¸¸ç›¸å…³
     output          Break,
     output          Syscall,
     output          Eret,
-    output          Reserved_instruction // ±£ÁôÖ¸Áî£¨Î´ÊµÏÖµÄÖ¸Áî£©          
+    output          Reserved_instruction // ä¿ç•™æŒ‡ä»¤ï¼ˆæœªå®ç°çš„æŒ‡ä»¤ï¼‰          
 );
    
-    wire R_format;		// Îª1±íÊ¾ÊÇR-ÀàĞÍÖ¸Áî
+    wire R_format;		// ä¸º1è¡¨ç¤ºæ˜¯R-ç±»å‹æŒ‡ä»¤
     reg [2:0] state;
     reg [2:0] next_state;
     parameter [2:0] sinit = 3'b000,//
-            sif = 3'b001,//È¡Ö¸
-            sid = 3'b010,//ÒëÂë
-            sexe = 3'b011,//Ö´ĞĞ
-            smem = 3'b100,//´æ´¢
-            swb = 3'b101;//»ØĞ´
+            sif = 3'b001,//å–æŒ‡
+            sid = 3'b010,//è¯‘ç 
+            sexe = 3'b011,//æ‰§è¡Œ
+            smem = 3'b100,//å­˜å‚¨
+            swb = 3'b101;//å›å†™
     
     wire[5:0]   op,func;
     wire[4:0]   rs,rt,rd,shamt;
@@ -78,8 +78,8 @@ module control32 (
     assign shamt = Instruction[10:6];  
     assign func = Instruction[5:0]; 
     
-    //RĞÍÖ¸Áî:
-    assign R_format = (op==6'b000000||op==6'b010000);        //RĞÍÖ¸Áî(mfc0,mtc0,eretÎªop==6'b010000)
+    //Rå‹æŒ‡ä»¤:
+    assign R_format = (op==6'b000000||op==6'b010000);        //Rå‹æŒ‡ä»¤(mfc0,mtc0,eretä¸ºop==6'b010000)
     assign Jrn = (op==6'b000000 && rt==5'b00000 && rd==5'b00000 && shamt==5'b00000 && func==6'b001000);
     assign Jalr = (op==6'b000000 && rt==5'b00000 && shamt==5'b00000 && func==6'b001001);
     
@@ -92,15 +92,15 @@ module control32 (
     
     assign Break = (op==6'b000000 && func==6'b001101);
     assign Syscall = (op==6'b000000 && func==6'b001100);
-    assign Eret = (Instruction==32'b010000_10000000000000000000_011000);//´ÓÖĞ¶Ï»òÕßÒì³£ÖĞ·µ»Ø
+    assign Eret = (Instruction==32'b010000_10000000000000000000_011000);//ä»ä¸­æ–­æˆ–è€…å¼‚å¸¸ä¸­è¿”å›
     
-    //IĞÍÖ¸Áî:I_format+Branch+nBranch+Lw+Sw
-    assign I_format = (op[5:3] == 3'b001);   //001xxxµÄIĞÍÖ¸Áî
-    assign L_format = (op[5:3] == 3'b100);   //´Ó´æ´¢Æ÷ÖĞ¶ÁÊı¾İ
-    assign S_format = (op[5:2] == 4'b1010);  //Ğ´´æ´¢Æ÷
+    //Iå‹æŒ‡ä»¤:I_format+Branch+nBranch+Lw+Sw
+    assign I_format = (op[5:3] == 3'b001);   //001xxxçš„Iå‹æŒ‡ä»¤
+    assign L_format = (op[5:3] == 3'b100);   //ä»å­˜å‚¨å™¨ä¸­è¯»æ•°æ®
+    assign S_format = (op[5:2] == 4'b1010);  //å†™å­˜å‚¨å™¨
     
-    assign Beq = (op==6'b000100);            //beqÖ¸Áî
-    assign Bne = (op==6'b000101);            //bneÖ¸Áî
+    assign Beq = (op==6'b000100);            //beqæŒ‡ä»¤
+    assign Bne = (op==6'b000101);            //bneæŒ‡ä»¤
     assign Bgez = (op==6'b000001&&rt==5'b00001);
     assign Bgtz = (op==6'b000111&&rt==5'b00000);
     assign Blez = (op==6'b000110&&rt==5'b00000);
@@ -109,9 +109,9 @@ module control32 (
     assign Bltzal = (op==6'b000001&&rt==5'b10000);
     //assign Branch = Beq||Bne||Bgez||Bgtz||Blez||Bltz||Bgezal||Bltzal;
    
-    //JĞÍÖ¸Áî
-    assign Jmp = (op==6'b000010)? 1'b1:1'b0;            //jÖ¸Áî
-    assign Jal = (op==6'b000011)? 1'b1:1'b0;            //jalÖ¸Áî
+    //Jå‹æŒ‡ä»¤
+    assign Jmp = (op==6'b000010)? 1'b1:1'b0;            //jæŒ‡ä»¤
+    assign Jal = (op==6'b000011)? 1'b1:1'b0;            //jalæŒ‡ä»¤
 
     assign MemRead = l_format&&(Alu_resultHigh!=22'b1111111111111111111111);    
     assign IORead = l_format&&(Alu_resultHigh==22'b1111111111111111111111);     
@@ -122,7 +122,7 @@ module control32 (
     assign Sftmd = (op==6'b000000&&(func[5:2]==4'b0001&&shamt==5'b00000||func[5:2]==4'b0000&&rs==5'b00000));//sll,srl,sra,sllv,srlv,srav
     assign DivSel = (op==6'b000000&&func[5:1]==5'b01101);
     assign ALUSrc = I_format||L_format||S_format;
-    assign ALUOp = {(R_format || I_format),(Beq || Bne || Bgez || Bgtz || Blez ||Bltz || Bgezal || Bltzal)};  // ÊÇR£­type»òĞèÒªÁ¢¼´Êı×÷32Î»À©Õ¹µÄÖ¸Áî1Î»Îª1,beq¡¢bneÖ¸ÁîÔò0Î»Îª1
+    assign ALUOp = {(R_format || I_format),(Beq || Bne || Bgez || Bgtz || Blez ||Bltz || Bgezal || Bltzal)};  // æ˜¯Rï¼typeæˆ–éœ€è¦ç«‹å³æ•°ä½œ32ä½æ‰©å±•çš„æŒ‡ä»¤1ä½ä¸º1,beqã€bneæŒ‡ä»¤åˆ™0ä½ä¸º1
     assign Memory_sign = !op[2];
     assign Memory_data_width = op[1:0];
     
@@ -135,17 +135,17 @@ module control32 (
     wire S3 = (S_format&&op[1:0]!=2'b10);//sb,sh,sw
     wire I24 = valueLogicI||L5||S3||Beq||Bne||Bgez||Bgtz||Blez||Bltz||Bgezal||Bltzal;
     wire J2 = Jmp||Jal;
-    assign Reserved_instruction = !(R31||I24||J2);//±£ÁôÖ¸Áî£¨Î´ÊµÏÖµÄÖ¸Áî£©Òì³£
+    assign Reserved_instruction = !(R31||I24||J2);//ä¿ç•™æŒ‡ä»¤ï¼ˆæœªå®ç°çš„æŒ‡ä»¤ï¼‰å¼‚å¸¸
         
     assign Wir = (state==sif);
     assign Waluresult = (state==sexe);
     
     //assign RegWrite = (R_format&&!Jrn)||I_format||Lw||Jal;     
     //assign RegWrite = ((state==sid)&Jal)|(state==swb);
-    //assign RegDST = R_format && (state == swb);                               //ËµÃ÷Ä¿±êÊÇrd£¬·ñÔòÊÇrt
+    //assign RegDST = R_format && (state == swb);                               //è¯´æ˜ç›®æ ‡æ˜¯rdï¼Œå¦åˆ™æ˜¯rt
     assign RegWrite = R_format? (func[5:3]==3'b100||func[5:1]==5'b10101||Mfhi||Mflo||Mfc0||Sftmd||Jalr):
                                 (I_format||L_format||Bgezal||Bltzal||Jal);
-    assign RegDST = Mfc0 ? 0:R_format;    // Ö»ÓĞRÖ¸Áî³ıÈ¥Mfc0Ê±Îªrd   
+    assign RegDST = Mfc0 ? 0:R_format;    // åªæœ‰RæŒ‡ä»¤é™¤å»Mfc0æ—¶ä¸ºrd   
     
     /*assign MemWrite = S_format&&(Alu_resultHigh!=22'b1111111111111111111111)&&(state==smem);   ///
     assign IOWrite = S_format&&(Alu_resultHigh==22'b1111111111111111111111)&&(state==smem);    ///
@@ -163,7 +163,7 @@ module control32 (
             sid:
                 if(Jmp|Jal|Jrn) begin
                     Wpc = 2'b10;
-                    next_state = sif;//JĞÍÖ¸Áî
+                    next_state = sif;//Jå‹æŒ‡ä»¤
                     end
                 else next_state = sexe;
             sexe: 
