@@ -34,7 +34,7 @@ module EX_MEM(
     input ID_EX_Jmp,
     input ID_EX_Jal,
     
-    input ID_EX_Beq,             //ËùÓĞ·ÖÖ§
+    input ID_EX_Beq,             //æ‰€æœ‰åˆ†æ”¯
     input ID_EX_Bne,             
     input ID_EX_Bgez,            
     input ID_EX_Bgtz,
@@ -69,8 +69,8 @@ module EX_MEM(
     input [1:0] ID_EX_Memory_data_width,
     input [31:0] ID_EX_opcplus4,
     input [31:0] ID_EX_PC,
-    //input [31:0] EX_Add_Result,     // ACU¼ÆËãºóµÄPCÖµ
-    input [31:0] EX_ALU_Result,	    // ALU¼ÆËãµÄÊı¾İ½á¹û
+    //input [31:0] EX_Add_Result,     // ACUè®¡ç®—åçš„PCå€¼
+    input [31:0] EX_ALU_Result,	    // ALUè®¡ç®—çš„æ•°æ®ç»“æœ
     input [4:0]  EX_Write_Address,
 
     output reg MEM_WB_Zero,
@@ -83,7 +83,7 @@ module EX_MEM(
     output reg MEM_WB_Jmp,
     output reg MEM_WB_Jal,
     
-    output reg MEM_WB_Beq,             //ËùÓĞ·ÖÖ§
+    output reg MEM_WB_Beq,             //æ‰€æœ‰åˆ†æ”¯
     output reg MEM_WB_Bne,             
     output reg MEM_WB_Bgez,            
     output reg MEM_WB_Bgtz,
