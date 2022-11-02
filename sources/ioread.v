@@ -2,15 +2,15 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module ioread (
-    input			reset,					// ¸´Î»ĞÅºÅ 
-    input			ioread,					// ´Ó¿ØÖÆÆ÷À´µÄI/O¶Á£¬
-    input			switchCtrl,				// ´Ómemorio¾­¹ıµØÖ·¸ß¶ËÏß»ñµÃµÄ²¦Âë¿ª¹ØÄ£¿éÆ¬Ñ¡
-    input	[15:0]	ioread_data_switch,		// ´ÓÍâÉèÀ´µÄ¶ÁÊı¾İ£¬´Ë´¦À´×Ô²¦Âë¿ª¹Ø
+    input			reset,					// å¤ä½ä¿¡å· 
+    input			ioread,					// ä»æ§åˆ¶å™¨æ¥çš„I/Oè¯»ï¼Œ
+    input			switchCtrl,				// ä»memorioç»è¿‡åœ°å€é«˜ç«¯çº¿è·å¾—çš„æ‹¨ç å¼€å…³æ¨¡å—ç‰‡é€‰
+    input	[15:0]	ioread_data_switch,		// ä»å¤–è®¾æ¥çš„è¯»æ•°æ®ï¼Œæ­¤å¤„æ¥è‡ªæ‹¨ç å¼€å…³
     input           keyboardCtrl,
     input   [15:0]  ioread_data_keyboard,
     input           timerCtrl,
     input   [15:0]  ioread_data_timer,
-    output reg[15:0] ioread_data	       // ½«ÍâÉèÀ´µÄÊı¾İËÍ¸ømemorio
+    output reg[15:0] ioread_data	       // å°†å¤–è®¾æ¥çš„æ•°æ®é€ç»™memorio
 );
     
     always @* begin
