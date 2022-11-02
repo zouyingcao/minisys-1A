@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// Ğ´»Ø½×¶Î
+// å†™å›é˜¶æ®µ
  module CP0(
 	input			reset,
     input			clock,
@@ -27,7 +27,7 @@
     input           Overflow,
     input           Divide_zero,
     input           Reserved_instruction,
-    input           Mfc0,           // ÌØÈ¨Ö¸Áî
+    input           Mfc0,           // ç‰¹æƒæŒ‡ä»¤
     input           Mtc0,
     input           Break,
     input           Syscall,
@@ -36,7 +36,7 @@
 
     input [31:0]    PC,
     input [4:0]     rd,
-    input [31:0]    rt_value,     //Ğ´µÄÊı¾İ 
+    input [31:0]    rt_value,     //å†™çš„æ•°æ® 
     output reg[31:0] cp0_data_out
     );
     wire wen;
@@ -44,44 +44,44 @@
     
     assign wen = (Mfc0 || Mtc0 || Break || Syscall || Overflow || Divide_zero || Reserved_instruction);
     
-    assign causeExcCode = (Syscall) ? 5'b01000 :                // ÏµÍ³µ÷ÓÃ syscall
-                          (Break) ? 5'b01001 :                  // ¾ø¶Ô¶ÏµãÖ¸Áî break
-                          (Reserved_instruction) ? 5'b01010 :   // ±£ÁôÖ¸Áî,cpuÖ´ĞĞµ½Ò»ÌõÎ´¶¨ÒåµÄÖ¸Áî
-                          (Overflow) ?  5'b01100 :              // ËãÊõÒç³ö£¬ÓĞ·ûºÅÔËËã¼Ó¼õÒç³ö
-                          (ExternalInterrupt) ? 5'b00000 :      // Íâ²¿ÖĞ¶Ï 
+    assign causeExcCode = (Syscall) ? 5'b01000 :                // ç³»ç»Ÿè°ƒç”¨ syscall
+                          (Break) ? 5'b01001 :                  // ç»å¯¹æ–­ç‚¹æŒ‡ä»¤ break
+                          (Reserved_instruction) ? 5'b01010 :   // ä¿ç•™æŒ‡ä»¤,cpuæ‰§è¡Œåˆ°ä¸€æ¡æœªå®šä¹‰çš„æŒ‡ä»¤
+                          (Overflow) ?  5'b01100 :              // ç®—æœ¯æº¢å‡ºï¼Œæœ‰ç¬¦å·è¿ç®—åŠ å‡æº¢å‡º
+                          (ExternalInterrupt) ? 5'b00000 :      // å¤–éƒ¨ä¸­æ–­ 
                           5'b11111;  
     
-    reg [31:0] cp0[0:31];   // cp0°üº¬32¸ö¼Ä´æÆ÷
+    reg [31:0] cp0[0:31];   // cp0åŒ…å«32ä¸ªå¯„å­˜å™¨
     reg cause_IE;           //
     reg [1:0] status_KSU;   // 
                        
     integer i;
     always @(negedge clock or posedge reset) begin
-        if(reset) begin // ³õÊ¼»¯¶Ôcp0¼Ä´æÆ÷È«²¿¸³Öµ0
+        if(reset) begin // åˆå§‹åŒ–å¯¹cp0å¯„å­˜å™¨å…¨éƒ¨èµ‹å€¼0
             for(i=0;i<32;i=i+1)    
                 cp0[i] = 0; 
         end else begin
             if(Eret) begin
-                // Step1. »Ö¸´ CP0.Status.KSU µÄÔ­Ê¼Öµ
+                // Step1. æ¢å¤ CP0.Status.KSU çš„åŸå§‹å€¼
                 cp0[12][4:3] = status_KSU;
-                // Step2. »Ö¸´ CP0.Cause.IE
+                // Step2. æ¢å¤ CP0.Cause.IE
                 cp0[13][0] = cause_IE;
                 // Step3. PC<-EPC
                 cp0_data_out = cp0[14];
-            end else if(wen) begin // ÖĞ¶ÏÏìÓ¦µÄ¹ı³Ì
-                 // Step1. ±£´æ CP0.Cause.IE
+            end else if(wen) begin // ä¸­æ–­å“åº”çš„è¿‡ç¨‹
+                 // Step1. ä¿å­˜ CP0.Cause.IE
                  cause_IE = cp0[13][0];
-                 // Step2. CP0.Cause.IE<-0 £¨ÆÁ±ÎÖĞ¶Ï£©
+                 // Step2. CP0.Cause.IE<-0 ï¼ˆå±è”½ä¸­æ–­ï¼‰
                  cp0[13][0] = 1'b0;
-                 // Step3. ±£´æ CP0.Status.KSU
+                 // Step3. ä¿å­˜ CP0.Status.KSU
                  status_KSU = cp0[12][4:3];
-                 // Step4. CP0.Status.KSU<-0£¨½øºËĞÄ²ã£©,KSU¡ªCPU ÌØÈ¨¼¶£¬0 ÎªºËĞÄ¼¶£¬2 ÎªÓÃ»§¼¶
+                 // Step4. CP0.Status.KSU<-0ï¼ˆè¿›æ ¸å¿ƒå±‚ï¼‰,KSUâ€”CPU ç‰¹æƒçº§ï¼Œ0 ä¸ºæ ¸å¿ƒçº§ï¼Œ2 ä¸ºç”¨æˆ·çº§
                  cp0[12][4:3] = 2'b00;
-                 // Step5. ¸ù¾İÖĞ¶Ï¡¢Òì³£ĞÅºÅ»òÖ´ĞĞµÄÊÇ Break »ò SysCall Ö¸Áî£¬ÌîĞ´ CP0.Cause.ExcCode
+                 // Step5. æ ¹æ®ä¸­æ–­ã€å¼‚å¸¸ä¿¡å·æˆ–æ‰§è¡Œçš„æ˜¯ Break æˆ– SysCall æŒ‡ä»¤ï¼Œå¡«å†™ CP0.Cause.ExcCode
                  cp0[13][6:2] = causeExcCode;
-                 // Step6. EPC?PC£¨±£´æ·µ»ØµØÖ·£©
+                 // Step6. EPC?PCï¼ˆä¿å­˜è¿”å›åœ°å€ï¼‰
                  cp0[14] = PC;
-                 // Step7. PC<-ÖĞ¶Ï´¦Àí³ÌĞòÈë¿ÚµØÖ·£¨ËùÓĞÖĞ¶ÏºÍÒì³£Ö»ÓĞÒ»¸öÈë¿ÚµØÖ·£¬32'h0x0000F000£©
+                 // Step7. PC<-ä¸­æ–­å¤„ç†ç¨‹åºå…¥å£åœ°å€ï¼ˆæ‰€æœ‰ä¸­æ–­å’Œå¼‚å¸¸åªæœ‰ä¸€ä¸ªå…¥å£åœ°å€ï¼Œ32'h0x0000F000ï¼‰
                  
                  if(Mtc0)
                     cp0[rd] = rt_value;
