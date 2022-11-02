@@ -10,7 +10,7 @@
 // Target Devices: 
 // Tool Versions: 
 // Description: 
-// ĞĞÁĞÉ¨Ãè
+// è¡Œåˆ—æ‰«æ
 // Dependencies: 
 // 
 // Revision:
@@ -23,11 +23,11 @@
 module keyboard(
     input clock,
     input reset,
-    input read_enable,              // ¶ÁĞÅºÅ
-    input keyboardCtrl,             // ¼üÅÌÆ¬Ñ¡ĞÅºÅ
+    input read_enable,              // è¯»ä¿¡å·
+    input keyboardCtrl,             // é”®ç›˜ç‰‡é€‰ä¿¡å·
     input [3:0] column,
-    input [2:0] address,            // µ½keyboardÄ£¿éµÄµØÖ·µÍ¶Ë
-    output reg[15:0] read_data_output, // ËÍµ½CPUµÄ4x4¼üÅÌÖµ
+    input [2:0] address,            // åˆ°keyboardæ¨¡å—çš„åœ°å€ä½ç«¯
+    output reg[15:0] read_data_output, // é€åˆ°CPUçš„4x4é”®ç›˜å€¼
     output reg[3:0] row
     );
     reg [15:0] count;
@@ -50,18 +50,18 @@ module keyboard(
                     if(column!=4'b1111)
                         state = 3'b001;
                 end
-                3'b001:begin // È¥¶¶´¦Àí
+                3'b001:begin // å»æŠ–å¤„ç†
                     if(count != 20000)
                         count <= count + 16'd1;
-                    else if(column == 4'b1111) begin  //Èç¹ûÕâÊ±ºòĞĞÏßÈ«Îª1 ËµÃ÷¶¶¶¯ÁË »Øµ½³õÊ¼×´Ì¬
+                    else if(column == 4'b1111) begin  //å¦‚æœè¿™æ—¶å€™è¡Œçº¿å…¨ä¸º1 è¯´æ˜æŠ–åŠ¨äº† å›åˆ°åˆå§‹çŠ¶æ€
                         state = 3'b000;
                         count = 16'd0;
-                    end else begin  //Èç¹ûÈÔÈ»²»È«Îª1 ËµÃ÷ÕæµÄÓĞ¼üÎ»ÊäÈë ¿ªÊ¼É¨ÃèĞĞ
-                        row = 4'b1110;// ´ÓµÚÒ»ĞĞ¿ªÊ¼É¨Ãè
+                    end else begin  //å¦‚æœä»ç„¶ä¸å…¨ä¸º1 è¯´æ˜çœŸçš„æœ‰é”®ä½è¾“å…¥ å¼€å§‹æ‰«æè¡Œ
+                        row = 4'b1110;// ä»ç¬¬ä¸€è¡Œå¼€å§‹æ‰«æ
                         state = 3'b010;
                     end
                 end
-                3'b010:begin // µÚÒ»ĞĞ(0,F,E,D)
+                3'b010:begin // ç¬¬ä¸€è¡Œ(0,F,E,D)
                     if(column == 4'b1111)begin
                         row = 4'b1101;
                         state = 3'b011;
@@ -79,7 +79,7 @@ module keyboard(
                             value[11:8] = 4'hE;
                     end
                 end 
-                3'b011:begin // µÚ¶şĞĞ(7,8,9,C)
+                3'b011:begin // ç¬¬äºŒè¡Œ(7,8,9,C)
                     if(column == 4'b1111)begin
                         row = 4'b1011;
                         state = 3'b100;
@@ -97,7 +97,7 @@ module keyboard(
                             value[11:8] = 4'h7;
                     end
                 end   
-                3'b100:begin // µÚÈıĞĞ(4,5,6,B)
+                3'b100:begin // ç¬¬ä¸‰è¡Œ(4,5,6,B)
                     if(column == 4'b1111)begin
                         row = 4'b0111;
                         state = 3'b101;
@@ -115,7 +115,7 @@ module keyboard(
                             value[11:8] = 4'h4;
                     end
                 end  
-                3'b101:begin // µÚËÄĞĞ(1,2,3,A)
+                3'b101:begin // ç¬¬å››è¡Œ(1,2,3,A)
                     if(column == 4'b1111)begin
                         row = 4'b0000;
                         state = 3'b000;
@@ -137,8 +137,8 @@ module keyboard(
 
         if (read_enable == 1)
             case (address)
-                3'b000: read_data_output = value; // {4'd0,column,row,value},¼üÖµ¼Ä´æÆ÷(0FFFFFC10H)
-                3'b010: // ×´Ì¬¼Ä´æÆ÷(0XFFFFFC12)
+                3'b000: read_data_output = value; // {4'd0,column,row,value},é”®å€¼å¯„å­˜å™¨(0FFFFFC10H)
+                3'b010: // çŠ¶æ€å¯„å­˜å™¨(0XFFFFFC12)
                     read_data_output = (state > 3'd1) ? 16'd1:16'd0;
                 default: read_data_output = 16'hZZZZ;
             endcase
