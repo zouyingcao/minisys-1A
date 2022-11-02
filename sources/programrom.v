@@ -3,8 +3,8 @@
 module programrom (
 	// Program ROM Pinouts
 	input			rom_clk_i,		// ROM clock
-	input	[13:0]	rom_adr_i,		// æ¥è‡ªå–å€¼å•å…ƒçš„PC
-	output	[31:0]	Jpadr,			// ç»™å–æŒ‡å•å…ƒçš„æŒ‡ä»¤?
+	input	[13:0]	rom_adr_i,		// À´×ÔÈ¡Öµµ¥ÔªµÄPC
+	output	[31:0]	Jpadr,			// ¸øÈ¡Ö¸µ¥ÔªµÄÖ¸Áî
 	// UART Programmer Pinouts
 	input           upg_rst_i,      // UPG reset (Active High)
 	input           upg_clk_i,      // UPG clock (10MHz)
@@ -14,10 +14,10 @@ module programrom (
 	input           upg_done_i      // 1 if programming is finished
 );
 
-	// kickOff = 1çš„æ—¶å€™CPUæ­£å¸¸å·¥ä½œï¼Œå¦åˆ™å°±æ˜¯ä¸²å£ä¸‹è½½ç¨‹åº
+	// kickOff = 1µÄÊ±ºòCPUÕı³£¹¤×÷£¬·ñÔò¾ÍÊÇ´®¿ÚÏÂÔØ³ÌĞò
     wire kickOff = upg_rst_i | (~upg_rst_i & upg_done_i);
 	
-	// åˆ†é…64KB ROM,ç¼–è¯‘å™¨å®é™…åªç”¨64KB ROM
+	// ·ÖÅä64KB ROM,±àÒëÆ÷Êµ¼ÊÖ»ÓÃ64KB ROM
     prgrom instmem (
         .clka	(kickOff ?	rom_clk_i	: upg_clk_i),
 		.wea	(kickOff ?	1'b0	    : upg_wen_i),

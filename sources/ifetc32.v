@@ -5,12 +5,12 @@ module Ifetc32 (
     input   [1:0]   Wpc,
     input           Wir,
     //
-	input			reset,				// å¤ä½ä¿¡å·(é«˜ç”µå¹³æœ‰æ•ˆ)
+	input			reset,				// ¸´Î»ĞÅºÅ(¸ßµçÆ½ÓĞĞ§)
 	input           PCWrite,
-    input			clock,				// æ—¶é’Ÿ(22MHz)
+    input			clock,				// Ê±ÖÓ(22MHz)
 
-    input   [25:0]  Jump_PC,            // æ¥è‡ªIDï¼ŒæŒ‡ä»¤ä¸­çš„addresséƒ¨åˆ†
-    input	[31:0]	Read_data_1,		// æ¥è‡ªè¯‘ç å•å…ƒï¼ŒjræŒ‡ä»¤ç”¨çš„åœ°å€
+    input   [25:0]  Jump_PC,            // À´×ÔID£¬Ö¸ÁîÖĞµÄaddress²¿·Ö
+    input	[31:0]	Read_data_1,		// À´×ÔÒëÂëµ¥Ôª£¬jrÖ¸ÁîÓÃµÄµØÖ·
     input           JR,
     input           J,
     input           IFBranch,
@@ -18,49 +18,49 @@ module Ifetc32 (
     input   [31:0]  ID_opcplus4,
     
     output reg[31:0]PC,              
-    output  [31:0]  opcplus4,			// jalæŒ‡ä»¤ä¸“ç”¨çš„PC+4
-    output  [31:0]  Instruction,        // è¾“å‡ºæŒ‡ä»¤åˆ°å…¶ä»–æ¨¡å—
-    // output  [31:0]  PC_plus_4_out,   // (pc+4)é€æ‰§è¡Œå•å…ƒ
+    output  [31:0]  opcplus4,			// jalÖ¸Áî×¨ÓÃµÄPC+4
+    output  [31:0]  Instruction,        // Êä³öÖ¸Áîµ½ÆäËûÄ£¿é
+    // output  [31:0]  PC_plus_4_out,   // (pc+4)ËÍÖ´ĞĞµ¥Ôª
     // ROM Pinouts
-	output	[13:0]	rom_adr_o,			// ç»™ç¨‹åºROMå•å…ƒçš„å–æŒ‡åœ°å€
-	input	[31:0]	Jpadr,				// ä»ç¨‹åºROMå•å…ƒä¸­è·å–çš„æŒ‡ä»¤
-	// ä¸­æ–­ç›¸å…³
+	output	[13:0]	rom_adr_o,			// ¸ø³ÌĞòROMµ¥ÔªµÄÈ¡Ö¸µØÖ·
+	input	[31:0]	Jpadr,				// ´Ó³ÌĞòROMµ¥ÔªÖĞ»ñÈ¡µÄÖ¸Áî
+	// ÖĞ¶ÏÏà¹Ø
 	input   [31:0]  interrupt_PC,
-	input           flush
+	input           cp0_wen
 );
     
     wire [31:0] PC_plus_4;
-    reg [31:0] next_PC;		                 // ä¸‹æ¡æŒ‡ä»¤çš„PCï¼ˆä¸ä¸€å®šæ˜¯PC+4)
+    reg [31:0] next_PC;		                 // ÏÂÌõÖ¸ÁîµÄPC£¨²»Ò»¶¨ÊÇPC+4)
    
-    assign Instruction = Jpadr;              // å–å‡ºæŒ‡ä»¤
+    assign Instruction = Jpadr;              // È¡³öÖ¸Áî
     assign rom_adr_o = PC[15:2];             
     assign PC_plus_4 = {PC[31:2] + 1,2'b00}; // PC+4
-    assign opcplus4 = {2'b00,PC_plus_4[31:2]}; // PC+4ï¼Œç”¨äºjalï¼Œ$31=PC+4ï¼Œå³ç§»ä¸¤ä½ä»¥å­˜å…¥å¯„å­˜å™¨
+    assign opcplus4 = {2'b00,PC_plus_4[31:2]}; // PC+4£¬ÓÃÓÚjal£¬$31=PC+4£¬ÓÒÒÆÁ½Î»ÒÔ´æÈë¼Ä´æÆ÷
     // assign PC_plus_4_out = PC_plus_4;
 
     wire [15:0] offset = Instruction[15:0];
     wire sign = offset[15];
     
-    // next_PCæ˜¯å³ç§»2ä½åçš„PCï¼Œä»è€Œä¿è¯å¼ºåˆ¶å¯¹é½
+    // next_PCÊÇÓÒÒÆ2Î»ºóµÄPC£¬´Ó¶ø±£Ö¤Ç¿ÖÆ¶ÔÆë
     always @* begin               
-        if(nBranch) next_PC = ID_opcplus4;          // IDæ®µåˆ†æ”¯é¢„æµ‹å¤±è´¥ï¼Œæœ‰æ¡ä»¶è·³è½¬æŒ‡ä»¤ä¸è·³è½¬
-        else if(JR) next_PC = Read_data_1;          // jr,jalr: PCâ†(rs),IDæ®µä¼ å…¥
+        if(nBranch) next_PC = ID_opcplus4;          // ID¶Î·ÖÖ§Ô¤²âÊ§°Ü£¬ÓĞÌõ¼şÌø×ªÖ¸Áî²»Ìø×ª
+        else if(JR) next_PC = Read_data_1;          // jr,jalr: PC¡û(rs),ID¶Î´«Èë
         else if(J)                                  // j,jal
-            next_PC = {6'b0000,Jump_PC};            // (Zero-Extend)address<<2ï¼Œå…ˆå·¦ç§»å†é›¶æ‰©å±•,å³ç§»ä¸¤ä½çš„ç»“æœ
-        else if(IFBranch)                           // IFæ®µé¢„æµ‹è·³è½¬æ¡ä»¶æˆç«‹
-            next_PC = {2'b00,PC_plus_4[31:2]}+{{16{sign}},offset}; // (PC)â†(PC)+4+((Sign-Extend)offset<<2),å³ç§»ä¸¤ä½çš„ç»“æœ
-        else if(flush) next_PC = interrupt_PC>>2;   // å…ˆå³ç§»ä¸¤ä½
-        else next_PC = {2'b00,PC_plus_4[31:2]};     // ä¸€èˆ¬æƒ…å†µ
+            next_PC = {6'b0000,Jump_PC};            // (Zero-Extend)address<<2£¬ÏÈ×óÒÆÔÙÁãÀ©Õ¹,ÓÒÒÆÁ½Î»µÄ½á¹û
+        else if(IFBranch)                           // IF¶ÎÔ¤²âÌø×ªÌõ¼ş³ÉÁ¢
+            next_PC = {2'b00,PC_plus_4[31:2]}+{{16{sign}},offset}; // (PC)¡û(PC)+4+((Sign-Extend)offset<<2),ÓÒÒÆÁ½Î»µÄ½á¹û
+        else if(cp0_wen) next_PC = interrupt_PC>>2; // ÏÈÓÒÒÆÁ½Î»
+        else next_PC = {2'b00,PC_plus_4[31:2]};     // Ò»°ãÇé¿ö
     end
     
-    always @(negedge clock) begin                   // æ—¶é’Ÿä¸‹é™æ²¿æ›´æ”¹PC
+    always @(negedge clock) begin                   // Ê±ÖÓÏÂ½µÑØ¸ü¸ÄPC
         if(reset) PC = 32'h00000000;
-        else if(PCWrite)PC = next_PC<<2;            // ç¡®ä¿æ˜¯4çš„å€æ•°
+        else if(PCWrite)PC = next_PC<<2;            // È·±£ÊÇ4µÄ±¶Êı
     end
     
     /*
 	// ROM Pinouts
-	assign rom_adr_o = next_PC;   // ç»™ç¨‹åºROMçš„å–æŒ‡åœ°å€
+	assign rom_adr_o = next_PC;   // ¸ø³ÌĞòROMµÄÈ¡Ö¸µØÖ·
     assign PC_plus_4 = {PC[15:2]+1,2'b0};
     
     reg [31:0] IR;
@@ -70,7 +70,7 @@ module Ifetc32 (
         else IR<=IR;
     end
     
-    assign Instruction = IR;    //ä»ç¨‹åºROMä¸­æ¥çš„æŒ‡ä»¤
+    assign Instruction = IR;    //´Ó³ÌĞòROMÖĞÀ´µÄÖ¸Áî
     assign PC_plus_4_out = PC;
      
     always @(negedge clock) begin 

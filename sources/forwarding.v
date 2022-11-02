@@ -21,23 +21,23 @@
 
 
 module forwarding(
-    input	[4:0]	ID_rs,		    // ç”¨äºåˆ†æ”¯çš„æºæ“ä½œæ•°,rs
+    input	[4:0]	ID_rs,		    // ÓÃÓÚ·ÖÖ§µÄÔ´²Ù×÷Êı,rs
     input	[4:0]	ID_rt,		    // rt
     input           ID_Mflo,
     input           ID_Mfhi,
     
-    input	[4:0]	EX_rs,		    // éåˆ†æ”¯
+    input	[4:0]	EX_rs,		    // ·Ç·ÖÖ§
     input   [4:0]   EX_rt,        
     input           EX_Mflo,
     input           EX_Mfhi,
     
-    //ç”¨äºåˆ†æ”¯æºæ•°æ®
+    //ÓÃÓÚ·ÖÖ§Ô´Êı¾İ
     input           ID_EX_RegWrite,
     input   [4:0]   ID_EX_waddr,
     input           ID_EX_Mtlo,
     input           ID_EX_Mthi,   
     
-    //å¤„ç†æ•°æ®è½¬å‘
+    //´¦ÀíÊı¾İ×ª·¢
     input           EX_MEM_RegWrite,
     input   [4:0]   EX_MEM_waddr,
     input           EX_MEM_Mtlo,
@@ -56,20 +56,20 @@ module forwarding(
     );
     // 01:register(rs),01;EX_MEM_xxx,10:MEM_WB_xxx
     assign ALUSrcA[0] = (EX_MEM_RegWrite && EX_rs==EX_MEM_waddr) 
-                        || (EX_Mflo && EX_MEM_Mtlo)    // å½“å‰è¯»LO,ä¸Šä¸€æ¡æŒ‡ä»¤å†™LOï¼Œä¸ç®¡ä¸Šä¸Šæ¡æ˜¯å¦æŒ‡ä»¤å†™LOï¼Œå–çš„éƒ½æ˜¯ä¸Šä¸€æ¡çš„ç»“æœ
+                        || (EX_Mflo && EX_MEM_Mtlo)    // µ±Ç°¶ÁLO,ÉÏÒ»ÌõÖ¸ÁîĞ´LO£¬²»¹ÜÉÏÉÏÌõÊÇ·ñÖ¸ÁîĞ´LO£¬È¡µÄ¶¼ÊÇÉÏÒ»ÌõµÄ½á¹û
                         || (EX_Mfhi && EX_MEM_Mthi);   
     assign ALUSrcA[1] = (MEM_WB_RegWrite && EX_rs==MEM_WB_waddr && !(EX_MEM_RegWrite && EX_rs==EX_MEM_waddr))   
-                        || (EX_Mflo && !EX_MEM_Mtlo && MEM_WB_Mtlo) || (EX_Mfhi && !EX_MEM_Mthi && MEM_WB_Mthi);// åªä¸ä¸Šä¸Šæ¡ç›¸å…³
+                        || (EX_Mflo && !EX_MEM_Mtlo && MEM_WB_Mtlo) || (EX_Mfhi && !EX_MEM_Mthi && MEM_WB_Mthi);// Ö»ÓëÉÏÉÏÌõÏà¹Ø
     
     // 00:register(rt),11:imm32,01:EX_MEM_xxx,10:MEM_WB_xxx
     // assign ALUSrcB[0] = (EX_ALUSrc == 1)? 1:EX_MEM_RegWrite && EX_rt==EX_MEM_waddr;
     // assign ALUSrcB[1] = (EX_ALUSrc == 1)? 1:MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && EX_MEM_waddr!=EX_rt;
-    // ä¸å¯èƒ½å‡ºç°11çš„æƒ…å†µ
+    // ²»¿ÉÄÜ³öÏÖ11µÄÇé¿ö
     assign ALUSrcB[0] = EX_MEM_RegWrite && EX_rt==EX_MEM_waddr;
     assign ALUSrcB[1] = MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && !(EX_MEM_RegWrite && EX_MEM_waddr==EX_rt);
 
     
-    // ç”¨äºåˆ†æ”¯æŒ‡ä»¤æºæ•°æ®
+    // ÓÃÓÚ·ÖÖ§Ö¸ÁîÔ´Êı¾İ
     assign ALUSrcC = 
         ((ID_EX_RegWrite && ID_rs==ID_EX_waddr) || (ID_Mflo && ID_EX_Mtlo) || (ID_Mfhi && ID_EX_Mthi)) ? 2'b01:
         ((EX_MEM_RegWrite && ID_rs==EX_MEM_waddr) || (ID_Mflo && EX_MEM_Mtlo) || (ID_Mfhi && EX_MEM_Mthi)) ? 2'b10:
@@ -82,6 +82,6 @@ module forwarding(
         (MEM_WB_RegWrite && ID_rt==MEM_WB_waddr) ? 2'b11:
         2'b00;
     
-    // ç”¨äºjalrå’Œjrçš„åˆ†æ”¯è·³è½¬åœ°å€ï¼ˆrsï¼‰
+    // ÓÃÓÚjalrºÍjrµÄ·ÖÖ§Ìø×ªµØÖ·£¨rs£©
     // assign ALUSrcE = ;
 endmodule

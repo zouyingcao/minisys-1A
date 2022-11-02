@@ -2,21 +2,21 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module switchs (
-    input			switrst,		// å¤ä½ä¿¡å·
-    input			switclk,		// æ—¶é’Ÿä¿¡å·
-    input			switchcs,		// ä»memorioæ¥çš„ï¼Œç”±ä½è‡³é«˜ä½å½¢æˆçš„switchç‰‡é€‰ä¿¡å·  !!!!!!!!!!!!!!!!!
-    input	[1:0]	switchaddr,		// åˆ°switchæ¨¡å—çš„åœ°å€ä½ç«¯  !!!!!!!!!!!!!!!
-    input			switchread,		// è¯»ä¿¡å·
-    output reg[15:0]switchrdata,	// é€åˆ°CPUçš„æ‹¨ç å¼€å…³å€¼æ³¨æ„æ•°æ®æ€»çº¿åªæœ‰16æ ¹
-    input	[23:0]	switch_i		// ä»æ¿ä¸Šè¯»çš„24ä½å¼€å…³æ•°æ®
+    input			switrst,		// ¸´Î»ĞÅºÅ
+    input			switclk,		// Ê±ÖÓĞÅºÅ
+    input			switchcs,		// ´ÓmemorioÀ´µÄ£¬ÓÉµÍÖÁ¸ßÎ»ĞÎ³ÉµÄswitchÆ¬Ñ¡ĞÅºÅ  !!!!!!!!!!!!!!!!!
+    input	[1:0]	switchaddr,		// µ½switchÄ£¿éµÄµØÖ·µÍ¶Ë  !!!!!!!!!!!!!!!
+    input			switchread,		// ¶ÁĞÅºÅ
+    output reg[15:0]switchrdata,	// ËÍµ½CPUµÄ²¦Âë¿ª¹ØÖµ×¢ÒâÊı¾İ×ÜÏßÖ»ÓĞ16¸ù
+    input	[23:0]	switch_i		// ´Ó°åÉÏ¶ÁµÄ24Î»¿ª¹ØÊı¾İ
 );
-    always@(negedge switclk or posedge switrst) begin
+    always@(posedge switclk or posedge switrst) begin
         if(switrst)
             switchrdata=24'h000000;
         else if(switchcs&&switchread) begin
             if(switchaddr==2'b00)  
                 switchrdata[15:0]=switch_i[15:0];
-            else if(switchaddr==2'b10) // 0xFFFFC62,24ä½æ•°æ®çš„é«˜8ä½æ•°æ®å¯¹åº”çº¢è‰²çš„RLD
+            else if(switchaddr==2'b10) // 0xFFFFC62,24Î»Êı¾İµÄ¸ß8Î»Êı¾İ¶ÔÓ¦ºìÉ«µÄRLD
                 switchrdata[15:0]={8'd0,switch_i[23:16]};
         end   
     end

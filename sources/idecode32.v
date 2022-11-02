@@ -4,10 +4,10 @@
 module Idecode32 (
 	input			reset,
     input			clock,
-    input  [31:0]   opcplus4,       // æ¥è‡ªå–æŒ‡å•å…ƒï¼ŒJALä¸­ç”¨
-    input  [31:0]	Instruction,	// å–æŒ‡å•å…ƒæ¥çš„æŒ‡ä»¤
-    input  [31:0]	wb_data,		// ä»DATA RAM or I/O portå–å‡ºçš„æ•°æ®
-    input  [31:0]	ALU_result,		// ä»æ‰§è¡Œå•å…ƒæ¥çš„è¿ç®—çš„ç»“æœï¼Œéœ€è¦æ‰©å±•ç«‹å³æ•°åˆ°32ä½
+    input  [31:0]   opcplus4,       // À´×ÔÈ¡Ö¸µ¥Ôª£¬JALÖĞÓÃ
+    input  [31:0]	Instruction,	// È¡Ö¸µ¥ÔªÀ´µÄÖ¸Áî
+    input  [31:0]	wb_data,		// ´ÓDATA RAM or I/O portÈ¡³öµÄÊı¾İ
+    input  [31:0]	ALU_result,		// ´ÓÖ´ĞĞµ¥ÔªÀ´µÄÔËËãµÄ½á¹û£¬ĞèÒªÀ©Õ¹Á¢¼´Êıµ½32Î»
     input  [4:0]    waddr,
     
     input			Jal,			// jal
@@ -18,21 +18,21 @@ module Idecode32 (
     input			RegWrite,		
     
     output [25:0]   Jump_PC,
-    output [31:0]   read_data_1,    // è¾“å‡ºçš„ç¬¬ä¸€æ“ä½œæ•°
-    output [31:0]   read_data_2,    // è¾“å‡ºçš„ç¬¬äºŒæ“ä½œæ•°
-    output [4:0]    write_address_1,// r-formæŒ‡ä»¤è¦å†™çš„å¯„å­˜å™¨çš„å·ï¼ˆrdï¼‰
-    output [4:0]    write_address_0,// i-formæŒ‡ä»¤è¦å†™çš„å¯„å­˜å™¨çš„å·(rt)
-    output [31:0]   write_data,     // è¦å†™å…¥å¯„å­˜å™¨çš„æ•°æ®
-    output [31:0]	Sign_extend,	// è¯‘ç å•å…ƒè¾“å‡ºçš„æ‰©å±•åçš„32ä½ç«‹å³æ•°
+    output [31:0]   read_data_1,    // Êä³öµÄµÚÒ»²Ù×÷Êı
+    output [31:0]   read_data_2,    // Êä³öµÄµÚ¶ş²Ù×÷Êı
+    output [4:0]    write_address_1,// r-formÖ¸ÁîÒªĞ´µÄ¼Ä´æÆ÷µÄºÅ£¨rd£©
+    output [4:0]    write_address_0,// i-formÖ¸ÁîÒªĞ´µÄ¼Ä´æÆ÷µÄºÅ(rt)
+    output [31:0]   write_data,     // ÒªĞ´Èë¼Ä´æÆ÷µÄÊı¾İ
+    output [31:0]	Sign_extend,	// ÒëÂëµ¥ÔªÊä³öµÄÀ©Õ¹ºóµÄ32Î»Á¢¼´Êı
     output [4:0]    rs              // rs
 );
     
-    reg[31:0] register[0:31];			        // å¯„å­˜å™¨ç»„å…±32ä¸ª32ä½å¯„å­˜å™¨
-    reg[4:0] write_register_address;            // è¦å†™çš„å¯„å­˜å™¨çš„å·
+    reg[31:0] register[0:31];			        // ¼Ä´æÆ÷×é¹²32¸ö32Î»¼Ä´æÆ÷
+    reg[4:0] write_register_address;            // ÒªĞ´µÄ¼Ä´æÆ÷µÄºÅ
 
-    wire[4:0] rt;                               // è¦è¯»çš„ç¬¬äºŒä¸ªå¯„å­˜å™¨çš„å·ï¼ˆrtï¼‰
-    wire[15:0] Instruction_immediate_value;     // æŒ‡ä»¤ä¸­çš„ç«‹å³æ•°
-    wire[5:0] opcode;                           // æŒ‡ä»¤ç 
+    wire[4:0] rt;                               // Òª¶ÁµÄµÚ¶ş¸ö¼Ä´æÆ÷µÄºÅ£¨rt£©
+    wire[15:0] Instruction_immediate_value;     // Ö¸ÁîÖĞµÄÁ¢¼´Êı
+    wire[5:0] opcode;                           // Ö¸ÁîÂë
     
     assign opcode = Instruction[31:26];	                        // op
     assign rs = Instruction[25:21];                             // rs
@@ -42,29 +42,29 @@ module Idecode32 (
     assign Instruction_immediate_value = Instruction[15:0];     // immediate
     assign Jump_PC = Instruction[25:0];                         // address
     
-    wire sign;                                  // å–ç¬¦å·ä½çš„å€¼
+    wire sign;                                  // È¡·ûºÅÎ»µÄÖµ
     assign sign = Instruction[15];
-    // andi,ori,xori,sltuié›¶æ‰©å±•, å…¶ä½™ç¬¦å·æ‰©å±•
+    // andi,ori,xori,sltuiÁãÀ©Õ¹, ÆäÓà·ûºÅÀ©Õ¹
     assign Sign_extend = (opcode==6'b001100||opcode==6'b001101||opcode==6'b001110||opcode==6'b001011) ? {16'd0,Instruction_immediate_value} : {{16{sign}},Instruction_immediate_value};
     
     assign read_data_1 = register[rs];
     assign read_data_2 = register[rt];
-    assign write_data = (Jal || Jalr || Bgezal || Bltzal) ? opcplus4 : wb_data; // ($31)â†(PC)+4(jal,bgezal,bltzal)æˆ–(rd)â†(PC)+4(jalr)
+    assign write_data = (Jal || Jalr || Bgezal || Bltzal) ? opcplus4 : wb_data; // ($31)¡û(PC)+4(jal,bgezal,bltzal)»ò(rd)¡û(PC)+4(jalr)
     
-    always @* begin                              // è¿™ä¸ªè¿›ç¨‹æŒ‡å®šä¸åŒæŒ‡ä»¤ä¸‹çš„ç›®æ ‡å¯„å­˜å™¨
+    always @* begin                              // Õâ¸ö½ø³ÌÖ¸¶¨²»Í¬Ö¸ÁîÏÂµÄÄ¿±ê¼Ä´æÆ÷
         if(Jal || (Bgezal && !Negative) || (Bltzal && Negative))
             write_register_address = 5'd31;
         else if(Bgezal||Bltzal)
-            write_register_address = 5'd0; // æ— æ•ˆ
+            write_register_address = 5'd0; // ÎŞĞ§
         else 
             write_register_address = waddr;
     end
     
     integer i;
-    always @(posedge clock) begin       // æœ¬è¿›ç¨‹å†™ç›®æ ‡å¯„å­˜å™¨
-        if(reset==1) begin              // åˆå§‹åŒ–å¯„å­˜å™¨ç»„
+    always @(posedge clock) begin       // ±¾½ø³ÌĞ´Ä¿±ê¼Ä´æÆ÷
+        if(reset==1) begin              // ³õÊ¼»¯¼Ä´æÆ÷×é
             for(i=0;i<32;i=i+1) register[i] <= i;
-        end else if(RegWrite==1) begin  // æ³¨æ„å¯„å­˜å™¨0æ’ç­‰äº0
+        end else if(RegWrite==1) begin  // ×¢Òâ¼Ä´æÆ÷0ºãµÈÓÚ0
             if(write_register_address != 5'b00000)
                 register[write_register_address] = write_data;
         end

@@ -2,22 +2,22 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module leds (
-    input			ledrst,		// å¤ä½ä¿¡å·
-    input			led_clk,	// æ—¶é’Ÿä¿¡å·
-    input			ledwrite,	// å†™ä¿¡å·
-    input			ledcs,		// ä»memorioæ¥çš„ï¼Œç”±ä½è‡³é«˜ä½å½¢æˆçš„LEDç‰‡é€‰ä¿¡å·   !!!!!!!!!!!!!!!!!
-    input	[1:0]	ledaddr,	// åˆ°LEDæ¨¡å—çš„åœ°å€ä½ç«¯  !!!!!!!!!!!!!!!!!!!!
-    input	[15:0]	ledwdata,	// å†™åˆ°LEDæ¨¡å—çš„æ•°æ®ï¼Œæ³¨æ„æ•°æ®çº¿åªæœ‰16æ ¹
-    output reg[23:0]ledout		// å‘æ¿å­ä¸Šè¾“å‡ºçš„24ä½LEDä¿¡å·
+    input			ledrst,		// ¸´Î»ĞÅºÅ
+    input			led_clk,	// Ê±ÖÓĞÅºÅ
+    input			ledwrite,	// Ğ´ĞÅºÅ
+    input			ledcs,		// ´ÓmemorioÀ´µÄ£¬ÓÉµÍÖÁ¸ßÎ»ĞÎ³ÉµÄLEDÆ¬Ñ¡ĞÅºÅ   !!!!!!!!!!!!!!!!!
+    input	[1:0]	ledaddr,	// µ½LEDÄ£¿éµÄµØÖ·µÍ¶Ë  !!!!!!!!!!!!!!!!!!!!
+    input	[15:0]	ledwdata,	// Ğ´µ½LEDÄ£¿éµÄÊı¾İ£¬×¢ÒâÊı¾İÏßÖ»ÓĞ16¸ù
+    output reg[23:0]ledout		// Ïò°å×ÓÉÏÊä³öµÄ24Î»LEDĞÅºÅ
 );
     
-    always@(negedge led_clk or posedge ledrst) begin
+    always@(posedge led_clk or posedge ledrst) begin
         if(ledrst)
             ledout=24'h000000;
         else if(ledcs&&ledwrite) begin
-            if(ledaddr==2'b00)  // 0xFFFFC60,24ä½æ•°æ®çš„ä½8ä½æ•°æ®å¯¹åº”ç»¿è‰²çš„GLD,æ¬¡ä½8ä½æ•°æ®å¯¹åº”é»„è‰²çš„YLD
+            if(ledaddr==2'b00)  // 0xFFFFC60,24Î»Êı¾İµÄµÍ8Î»Êı¾İ¶ÔÓ¦ÂÌÉ«µÄGLD,´ÎµÍ8Î»Êı¾İ¶ÔÓ¦»ÆÉ«µÄYLD
                 ledout[15:0]=ledwdata;
-            else if(ledaddr==2'b10) // 0xFFFFC62,24ä½æ•°æ®çš„é«˜8ä½æ•°æ®å¯¹åº”çº¢è‰²çš„RLD
+            else if(ledaddr==2'b10) // 0xFFFFC62,24Î»Êı¾İµÄ¸ß8Î»Êı¾İ¶ÔÓ¦ºìÉ«µÄRLD
                 ledout[23:16]=ledwdata[7:0];
         end
     end

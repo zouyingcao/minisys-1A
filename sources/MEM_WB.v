@@ -22,6 +22,7 @@
 
 module MEM_WB(
     input reset,
+    input flush,
     input clock,
     input EX_MEM_RegWrite,
     input EX_MEM_MemIOtoReg,
@@ -31,8 +32,8 @@ module MEM_WB(
     input EX_MEM_Mtlo,
     input [31:0] EX_MEM_opcplus4,
     input [31:0] EX_MEM_PC,
-    input [31:0] MEM_ALU_Result,    // ALU录脝脣茫碌脛脢媒戮脻陆谩鹿没
-    input [31:0] MEM_MemData,
+    input [31:0] MEM_ALU_Result,    // ALU计算的数据结果
+    input [31:0] MEM_MemorIOData,
     input [31:0] EX_MEM_rt_value,
     input [4:0] EX_MEM_waddr,
     input [4:0] EX_MEM_rd,
@@ -77,14 +78,14 @@ module MEM_WB(
     output reg[31:0] WB_opcplus4,
     output reg[31:0] WB_PC,
     output reg[31:0] WB_ALU_Result,
-    output reg[31:0] WB_MemData,
+    output reg[31:0] WB_MemorIOData,
     output reg[31:0] WB_rt_value,
     output reg[4:0]  WB_rd,
     output reg[4:0]  WB_waddr
     
     );
-    always @(negedge clock) begin
-        if(reset) begin
+    always @(negedge clock or posedge reset or posedge flush) begin
+        if(reset||flush) begin
             WB_RegWrite = 1'b0;
             WB_MemIOtoReg = 1'b0;
             WB_Mfhi = 1'b0;
@@ -110,7 +111,7 @@ module MEM_WB(
             WB_opcplus4 = 32'd0;
             WB_PC = 32'd0;
             WB_ALU_Result = 32'd0;
-            WB_MemData = 32'd0;
+            WB_MemorIOData = 32'd0;
             WB_waddr = 5'd0;
             WB_rt_value = 32'd0;
             WB_rd = 5'd0;
@@ -140,7 +141,7 @@ module MEM_WB(
             WB_opcplus4 = EX_MEM_opcplus4;
             WB_PC = EX_MEM_PC;
             WB_ALU_Result = MEM_ALU_Result;
-            WB_MemData = MEM_MemData;
+            WB_MemorIOData = MEM_MemorIOData;
             WB_waddr = EX_MEM_waddr;
             WB_rt_value = EX_MEM_rt_value;
             WB_rd = EX_MEM_rd;

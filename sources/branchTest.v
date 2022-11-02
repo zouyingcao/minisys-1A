@@ -10,8 +10,8 @@
 // Target Devices: 
 // Tool Versions: 
 // Description: 
-// ä½äºIDæ®µï¼Œç”¨äºåˆ†æ”¯é¢„æµ‹ã€€æ£€æµ‹æ˜¯å¦æ»¡è¶³åˆ†æ”¯æ¡ä»¶
-// åœ¨æµæ°´çº¿ä¸­æå‰åˆ†æ”¯æŒ‡ä»¤çš„æ‰§è¡Œè¿‡ç¨‹ï¼Œä»è€Œå‡å°‘éœ€è¦æ¸…é™¤çš„æŒ‡ä»¤æ•°
+// Î»ÓÚID¶Î£¬ÓÃÓÚ·ÖÖ§Ô¤²â¡¡¼ì²âÊÇ·ñÂú×ã·ÖÖ§Ìõ¼ş
+// ÔÚÁ÷Ë®ÏßÖĞÌáÇ°·ÖÖ§Ö¸ÁîµÄÖ´ĞĞ¹ı³Ì£¬´Ó¶ø¼õÉÙĞèÒªÇå³ıµÄÖ¸ÁîÊı
 // Dependencies: 
 // 
 // Revision:
@@ -23,7 +23,7 @@
 
 module branchTest(
     input   [5:0]   IF_op,
-    // æœ‰æ¡ä»¶è·³è½¬ IDæ®µä¼ å…¥
+    // ÓĞÌõ¼şÌø×ª ID¶Î´«Èë
     input           Beq,
     input           Bne,
     input           Bgez,
@@ -67,17 +67,17 @@ module branchTest(
     assign Negative = rs[31]==1'b1;
     assign Positive = (rs[31]==1'b0&&rs!=32'd0);
     
-    // æœ‰æ¡ä»¶è·³è½¬,æ¡ä»¶ä¸æˆç«‹æ—¶
+    // ÓĞÌõ¼şÌø×ª,Ìõ¼ş²»³ÉÁ¢Ê±
     assign nBranch = (Beq&&!Zero)||(Bne&&Zero)||
             (Bgez&&Negative)||(Bgtz&&!Positive)||
             (Blez&&Positive)||(Bltz&&!Negative)||
-            (Bgezal&&Negative)||(Bltzal&&!Negative); // (PC)â†(PC)+4+((Sign-Extend)offset<<2)
+            (Bgezal&&Negative)||(Bltzal&&!Negative); // (PC)¡û(PC)+4+((Sign-Extend)offset<<2)
     
     assign JR = Jalr||Jrn;
     assign J = Jmp||Jal;
     
-    assign IF_Flush = nBranch||JR||J;   // IDæ®µå‘ç°é¢„æµ‹è·³è½¬å¤±è´¥ã€€æˆ–ã€€IFæ®µæ— æ¡ä»¶è·³è½¬
-    
+    // assign IF_Flush = nBranch||JR||J;   // ID¶Î·¢ÏÖÔ¤²âÌø×ªÊ§°Ü¡¡»ò¡¡IF¶ÎÎŞÌõ¼şÌø×ª
+    assign IF_Flush = nBranch;
     assign IFBranch = IF_op==6'b000100||IF_op==6'b000101||IF_op==6'b000111||IF_op==6'b000110||IF_op==6'b000001;
 
 endmodule

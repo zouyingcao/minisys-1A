@@ -25,122 +25,130 @@ module timer(
     input reset,
     input pluse0,
     input pluse1,
-    input read_enable,              // è¯»ä¿¡å·
-    input write_enable,             // å†™ä¿¡å·
-    input timerCtrl,                // å®šæ—¶å™¨/è®¡æ•°å™¨ç‰‡é€‰ä¿¡å·
-    input [2:0] address,            // æ–¹å¼å¯„å­˜å™¨ï¼š0/2ï¼Œåˆå§‹å€¼å¯„å­˜å™¨ï¼š4/6
-    input[15:0] write_data_in,      // å†™åˆ°CTCæ¨¡å—çš„æ•°æ®
-    output reg[15:0] read_data_out,// ä»CTCæ¨¡å—è¯»åˆ°CPUçš„æ•°æ®
-    output reg CTC0_output,        // ä½ç”µå¹³æœ‰æ•ˆ
+    input read_enable,              // ¶ÁĞÅºÅ
+    input write_enable,             // Ğ´ĞÅºÅ
+    input timerCtrl,                // ¶¨Ê±Æ÷/¼ÆÊıÆ÷Æ¬Ñ¡ĞÅºÅ
+    input [2:0] address,            // ·½Ê½¼Ä´æÆ÷£º0/2£¬³õÊ¼Öµ¼Ä´æÆ÷£º4/6
+    input[15:0] write_data_in,      // Ğ´µ½CTCÄ£¿éµÄÊı¾İ
+    output reg[15:0] read_data_out,// ´ÓCTCÄ£¿é¶Áµ½CPUµÄÊı¾İ
+    output reg CTC0_output,        // µÍµçÆ½ÓĞĞ§
     output reg CTC1_output
     );
-    reg [15:0] CNT0,CNT1;           // å½“å‰å€¼å¯„å­˜å™¨(åªè¯»å¯„å­˜å™¨)ï¼ˆ0XFFFFFC24, 0XFFFFFC26ï¼‰
-    reg [15:0] init0,init1;         // åˆå§‹å€¼å¯„å­˜å™¨(åªå†™å¯„å­˜å™¨)ï¼ˆ0XFFFFFC24, 0XFFFFFC26ï¼‰
-    reg [15:0] mode0,mode1;         // æ–¹å¼å¯„å­˜å™¨(åªå†™å¯„å­˜å™¨)ï¼ˆ0XFFFFFC20, 0XFFFFFC22ï¼‰
-    reg [15:0] status0,status1;     // çŠ¶æ€å¯„å­˜å™¨(åªè¯»å¯„å­˜å™¨)ï¼ˆ0XFFFFFC20, 0XFFFFFC22ï¼‰
+    reg [15:0] CNT0,CNT1;           // µ±Ç°Öµ¼Ä´æÆ÷(Ö»¶Á¼Ä´æÆ÷)£¨0XFFFFFC24, 0XFFFFFC26£©
+    reg [15:0] init0,init1;         // ³õÊ¼Öµ¼Ä´æÆ÷(Ö»Ğ´¼Ä´æÆ÷)£¨0XFFFFFC24, 0XFFFFFC26£©
+    reg [15:0] mode0,mode1;         // ·½Ê½¼Ä´æÆ÷(Ö»Ğ´¼Ä´æÆ÷)£¨0XFFFFFC20, 0XFFFFFC22£©
+    reg [15:0] status0,status1;     // ×´Ì¬¼Ä´æÆ÷(Ö»¶Á¼Ä´æÆ÷)£¨0XFFFFFC20, 0XFFFFFC22£©
 
-    always @(negedge clock) begin
-        if(timerCtrl==0||reset==1) begin
-            CTC0_output = 1;
-            CTC1_output = 1;
+    always @(posedge clock) begin
+        if(reset == 1) begin
+            CTC0_output = 1'b1;
+            CTC1_output = 1'b1;
             init0 = 16'h0000;
             init1 = 16'h0000;
+            CNT0 = init0;
+            CNT1 = init1;
             mode0 = 16'h0000;
             mode1 = 16'h0000;
             status0 = 16'h0000;
             status1 = 16'h0000;
-        end else if(read_enable==1)begin
-            case(address) // å¤„ç†å¯¹åªè¯»å¯„å­˜å™¨çš„è®¿é—®
+        end else if(read_enable == 1)begin
+            case(address) // ´¦Àí¶ÔÖ»¶Á¼Ä´æÆ÷µÄ·ÃÎÊ
                 3'b000: begin
-                    read_data_out=status0;
+                    read_data_out = status0;
                     status0 = 16'h0000;
                 end
                 3'b010: begin
-                    read_data_out=status1;
-                    status1 = 16'h0000; // çŠ¶æ€å¯„å­˜å™¨åœ¨è¢«è¯»å–åè¢«æ¸…é›¶
+                    read_data_out = status1;
+                    status1 = 16'h0000; // ×´Ì¬¼Ä´æÆ÷ÔÚ±»¶ÁÈ¡ºó±»ÇåÁã
                 end
-                3'b100:read_data_out=CNT0;
-                3'b110:read_data_out=CNT1;
+                3'b100:read_data_out = CNT0;
+                3'b110:read_data_out = CNT1;
             endcase
         end else if(write_enable==1) begin
-            case(address) // å¤„ç†å¯¹åªè¯»å¯„å­˜å™¨çš„è®¿é—®
+            case(address) // ´¦Àí¶ÔÖ»¶Á¼Ä´æÆ÷µÄ·ÃÎÊ
                 3'b000: begin
-                    mode0=write_data_in;
-                    status0[15]=1'b0;// æ–¹å¼å¯„å­˜å™¨è®¾ç½®åè¿˜æ²¡æœ‰å†™è®¡æ•°åˆå§‹å€¼æ—¶ï¼ŒçŠ¶æ€å¯„å­˜å™¨æœ‰æ•ˆä½ç½®0
+                    mode0 = write_data_in;
+                    status0[15] = 1'b0;// ·½Ê½¼Ä´æÆ÷ÉèÖÃºó»¹Ã»ÓĞĞ´¼ÆÊı³õÊ¼ÖµÊ±£¬×´Ì¬¼Ä´æÆ÷ÓĞĞ§Î»ÖÃ0
                     end
                 3'b010: begin
-                    mode1=write_data_in;
-                    status1[15]=1'b0;
+                    mode1 = write_data_in;
+                    status1[15] = 1'b0;
                     end
                 3'b100: begin 
-                    init0=write_data_in;
-                    status0[15]=1'b1;// å†™å¥½è®¡æ•°åˆå§‹å€¼åï¼ŒçŠ¶æ€å¯„å­˜å™¨æœ‰æ•ˆä½ç½®1
+                    init0 = write_data_in;
+                    CNT0 = init0;
+                    status0[15] = 1'b1;// Ğ´ºÃ¼ÆÊı³õÊ¼Öµºó£¬×´Ì¬¼Ä´æÆ÷ÓĞĞ§Î»ÖÃ1
                     end
                 3'b110:begin
-                    init1=write_data_in;
-                    status1[15]=1'b1;
+                    init1 = write_data_in;
+                    CNT1 = init1;
+                    status1[15] = 1'b1;
                     end
             endcase
         end
     end
 
-    always @(negedge clock) begin
-        if(status0[15])begin                // å®šæ—¶/è®¡æ•°æœ‰æ•ˆ
-            CNT0 <= CNT0 - 16'd1;           // å½“å‰å€¼-1
-            if (mode0[0] == 1'b0) begin     // å®šæ—¶æ¨¡å¼  
+    always @(posedge clock) begin
+        if(status0[15])begin                // ¶¨Ê±/¼ÆÊıÓĞĞ§
+            CNT0 <= CNT0 - 16'd1;           // µ±Ç°Öµ-1
+            if (mode0[0] == 1'b0) begin     // ¶¨Ê±Ä£Ê½  
                 if (CNT0 == 16'd1) begin   
-                    status0[15] = 1'b0;     // è¡¨ç¤ºå®šæ—¶æ— æ•ˆ
-                    status0[0] = 1'b1;      // è¡¨ç¤ºå®šæ—¶åˆ°
-                    CTC0_output = 1'b0;     // å®šæ—¶æ–¹å¼ä¸­ï¼Œåœ¨æ—¶é’Ÿä½œç”¨ä¸‹è®¡æ—¶å™¨åšå‡1æ“ä½œï¼Œåˆ°1çš„æ—¶å€™è®¾ç½®çŠ¶æ€å¯„å­˜å™¨çš„ç›¸åº”ä½ï¼Œå¹¶åœ¨ç›¸åº”çš„COUTè„šè¾“å‡ºä¸€ä¸ªæ—¶é’Ÿçš„ä½ç”µå¹³ï¼ˆå¹³æ—¶COUTæ˜¯é«˜ç”µå¹³ï¼‰
+                    status0[15] = 1'b0;     // ±íÊ¾¶¨Ê±ÎŞĞ§
+                    status0[0] = 1'b1;      // ±íÊ¾¶¨Ê±µ½
+                    CTC0_output = 1'b0;     // ¶¨Ê±·½Ê½ÖĞ£¬ÔÚÊ±ÖÓ×÷ÓÃÏÂ¼ÆÊ±Æ÷×ö¼õ1²Ù×÷£¬µ½1µÄÊ±ºòÉèÖÃ×´Ì¬¼Ä´æÆ÷µÄÏàÓ¦Î»£¬²¢ÔÚÏàÓ¦µÄCOUT½ÅÊä³öÒ»¸öÊ±ÖÓµÄµÍµçÆ½£¨Æ½Ê±COUTÊÇ¸ßµçÆ½£©
                 end
-            end else begin                  // è®¡æ•°æ¨¡å¼
+            end else begin                  // ¼ÆÊıÄ£Ê½
                 if (CNT0 == 16'd0) begin    
-                    status0[15] = 1'b0;     // è¡¨ç¤ºè®¡æ•°æ— æ•ˆ
-                    status0[1] = 1'b1;      // è¡¨ç¤ºè®¡æ•°åˆ°
+                    status0[15] = 1'b0;     // ±íÊ¾¼ÆÊıÎŞĞ§
+                    status0[1] = 1'b1;      // ±íÊ¾¼ÆÊıµ½
                     //CTC0_output = 1'b0;
                 end
             end
         end
     end
     
-    always @(CTC0_output) begin
+    always @(negedge clock) begin
         if (CTC0_output == 1'b0) begin
-            if (mode0[1] == 1'b1) begin // é‡å¤æ¨¡å¼
+            if (mode0[1] == 1'b1) begin // ÖØ¸´Ä£Ê½
+                status0[15] = 1'b1;
+                status0[0] = 1'b0; 
                 CNT0 = init0;
                 CTC0_output = 1'b1;
-        end else begin // éé‡å¤æ¨¡å¼
+            end else begin // ·ÇÖØ¸´Ä£Ê½
                 status0[15] = 1'b0;
                 CNT0 = 16'h0000;
             end
         end
     end
     
-    always @(negedge clock) begin
-        if(status1[15])begin            // å®šæ—¶/è®¡æ•°æœ‰æ•ˆ
-            CNT1 <= CNT1 - 16'd1;           // å½“å‰å€¼-1
-            if (mode1[0] == 1'b0) begin     // å®šæ—¶æ¨¡å¼  
-                if (CNT1 == 16'd1) begin    // è®¾ç½®çŠ¶æ€å¯„å­˜å™¨æœ‰æ•ˆä½ä¸º0ï¼Œ
-                    status1[15] = 1'b0;     // è¡¨ç¤ºå®šæ—¶æ— æ•ˆ
-                    status1[0] = 1'b1;      // è¡¨ç¤ºå®šæ—¶åˆ°
+    always @(posedge clock) begin
+        if(status1[15])begin            // ¶¨Ê±/¼ÆÊıÓĞĞ§
+            CNT1 <= CNT1 - 16'd1;           // µ±Ç°Öµ-1
+            if (mode1[0] == 1'b0) begin     // ¶¨Ê±Ä£Ê½  
+                if (CNT1 == 16'd1) begin    // ÉèÖÃ×´Ì¬¼Ä´æÆ÷ÓĞĞ§Î»Îª0£¬
+                    status1[15] = 1'b0;     // ±íÊ¾¶¨Ê±ÎŞĞ§
+                    status1[0] = 1'b1;      // ±íÊ¾¶¨Ê±µ½
                     CTC1_output = 1'b0;     
                 end
-            end else begin                  // è®¡æ•°æ¨¡å¼
-                if (CNT1 == 16'd0) begin    // è®¾ç½®çŠ¶æ€å¯„å­˜å™¨æœ‰æ•ˆä½ä¸º0ï¼Œè®¡æ•°åˆ°ä½ä¸º1
-                    status1[15] = 1'b0;     // è¡¨ç¤ºè®¡æ•°æ— æ•ˆ
-                    status1[1] = 1'b1;      // è¡¨ç¤ºè®¡æ•°åˆ°
+            end else begin                  // ¼ÆÊıÄ£Ê½
+                if (CNT1 == 16'd0) begin    // ÉèÖÃ×´Ì¬¼Ä´æÆ÷ÓĞĞ§Î»Îª0£¬¼ÆÊıµ½Î»Îª1
+                    status1[15] = 1'b0;     // ±íÊ¾¼ÆÊıÎŞĞ§
+                    status1[1] = 1'b1;      // ±íÊ¾¼ÆÊıµ½
                     //CTC1_output = 1'b0;
                 end
             end
         end
     end
     
-    // é‡å¤æ¨¡å¼æ£€æµ‹
-    always @(CTC1_output) begin
+    // ÖØ¸´Ä£Ê½¼ì²â
+    always @(negedge clock) begin
         if (CTC1_output == 1'b0) begin
-            if (mode1[1] == 1'b1) begin // é‡å¤æ¨¡å¼
+            if (mode1[1] == 1'b1) begin // ÖØ¸´Ä£Ê½
+                status1[15] = 1'b1;
+                status1[0] = 1'b0; 
                 CNT1 = init1;
                 CTC1_output = 1'b1;
-        end else begin // éé‡å¤æ¨¡å¼
+        end else begin // ·ÇÖØ¸´Ä£Ê½
                 status1[15] = 1'b0;
                 CNT1 = 16'h0000;
             end
