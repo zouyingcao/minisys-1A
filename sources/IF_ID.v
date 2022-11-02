@@ -19,15 +19,15 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// IRÓëNPC
+// IRä¸NPC
 module IF_ID(
     input cpu_clk,
     input reset,
-    input flush,                      // IF/ID¼Ä´æÆ÷Çå¿ÕĞÅºÅ
+    input flush,                      // IF/IDå¯„å­˜å™¨æ¸…ç©ºä¿¡å·
     input PCWrite,
     input [31:0] IF_PC,               
-    input [31:0] IF_opcplus4,         //È¡Ö¸µ¥ÔªÊä³öËø´æµÄPC+4
-    input [31:0] IF_instruction,      //È¡Ö¸µ¥ÔªÊä³öÖ¸Áî
+    input [31:0] IF_opcplus4,         //å–æŒ‡å•å…ƒè¾“å‡ºé”å­˜çš„PC+4
+    input [31:0] IF_instruction,      //å–æŒ‡å•å…ƒè¾“å‡ºæŒ‡ä»¤
     output reg[31:0] ID_EX_PC,       
     output reg[31:0] ID_opcplus4,
     output reg[31:0] ID_instruction  
