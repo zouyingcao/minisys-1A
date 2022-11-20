@@ -18,7 +18,7 @@ module Ifetc32 (
     input   [31:0]  ID_opcplus4,
     
     output reg[31:0]PC,              
-    output  [31:0]  opcplus4,			// jal指令专用的PC+4
+    output [31:0]   opcplus4,			// jal指令专用的PC+4
     output  [31:0]  Instruction,        // 输出指令到其他模块
     // output  [31:0]  PC_plus_4_out,   // (pc+4)送执行单元
     // ROM Pinouts
@@ -36,7 +36,6 @@ module Ifetc32 (
     assign rom_adr_o = PC[15:2];             
     assign PC_plus_4 = {PC[31:2] + 1,2'b00}; // PC+4
     assign opcplus4 = {2'b00,PC_plus_4[31:2]}; // PC+4，用于jal，$31=PC+4，右移两位以存入寄存器
-    // assign PC_plus_4_out = PC_plus_4;
 
     wire [15:0] offset = Instruction[15:0];
     wire sign = offset[15];
@@ -56,37 +55,5 @@ module Ifetc32 (
     always @(negedge clock) begin                   // 时钟下降沿更改PC
         if(reset) PC = 32'h00000000;
         else if(PCWrite)PC = next_PC<<2;            // 确保是4的倍数
-    end
-    
-    /*
-	// ROM Pinouts
-	assign rom_adr_o = next_PC;   // 给程序ROM的取指地址
-    assign PC_plus_4 = {PC[15:2]+1,2'b0};
-    
-    reg [31:0] IR;
-    always @(negedge clock) begin
-        if(reset) IR<=0;
-        else if(Wir) IR<=Jpadr;
-        else IR<=IR;
-    end
-    
-    assign Instruction = IR;    //从程序ROM中来的指令
-    assign PC_plus_4_out = PC;
-     
-    always @(negedge clock) begin 
-        if(reset) PC <= 32'b0;      
-        else begin
-            case(Wpc)
-                2'b01: if(Jmp||Jal) begin
-                        opcplus4 = {2'b00,PC_plus_4[31:2]};
-                        next_PC = {4'b0000,IR[27:0]<<2};
-                        end
-                    else next_PC = Read_data_1; // jr
-                2'b10: PC[31:0] = {next_PC[29:0],2'b00};
-                2'b11: next_PC = Add_result;// beq||bne
-            endcase
-        end
-    end
- */
-    
+    end 
 endmodule

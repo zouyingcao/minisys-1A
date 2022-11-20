@@ -354,7 +354,7 @@ module minisys (
     // rtd,A,B,NPC,E,cmd 
     ID_EX ID_EX(
         .cpu_clk        (cpu_clk),
-        .flush          (cp0_wen||if_flush),
+        .flush          (cp0_wen),////
         .reset          (rst),
         .stall          (id_ex_stall),
         .ID_opcplus4    (id_opcplus4),

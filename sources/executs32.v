@@ -133,20 +133,21 @@ module Executs32 (
     wire [31:0] test42=s_Ainput%s_Binput;
     
     // 有符号乘法
-    multiplier_signed mul_signed(
-        .CLK(clock),
-        .A(Ainput),
-        .B(Binput),
-        .P(mul_signed_result)
-    );
-    
+//    multiplier_signed mul_signed(
+//        .CLK(clock),
+//        .A(Ainput),
+//        .B(Binput),
+//        .P(mul_signed_result)
+//    );
+    assign mul_signed_result=s_Ainput*s_Binput;
     // 无符号乘法
-    multiplier_unsigned mul_unsigned(
-        .CLK(clock),
-        .A(Ainput),
-        .B(Binput),
-        .P(mul_unsigned_result)
-    );
+//    multiplier_unsigned mul_unsigned(
+//        .CLK(clock),
+//        .A(Ainput),
+//        .B(Binput),
+//        .P(mul_unsigned_result)
+//    );
+    assign mul_unsigned_result=Ainput*Binput;
     
     // 有符号除法
     div_signed div_signed(

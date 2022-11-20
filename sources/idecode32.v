@@ -4,7 +4,7 @@
 module Idecode32 (
 	input			reset,
     input			clock,
-    input  [31:0]   opcplus4,       // 来自取指单元，JAL中用
+    input  [31:0]   opcplus4,      
     input  [31:0]	Instruction,	// 取指单元来的指令
     input  [31:0]	wb_data,		// 从DATA RAM or I/O port取出的数据
     input  [31:0]	ALU_result,		// 从执行单元来的运算的结果，需要扩展立即数到32位
