@@ -55,31 +55,31 @@ module forwarding(
     //output  [1:0]   ALUSrcE
     );
     // 01:register(rs),01;EX_MEM_xxx,10:MEM_WB_xxx
-    assign ALUSrcA[0] = (EX_MEM_RegWrite && EX_rs==EX_MEM_waddr) 
+    assign ALUSrcA[0] = (EX_MEM_RegWrite && EX_rs===EX_MEM_waddr) 
                         || (EX_Mflo && EX_MEM_Mtlo)    // 当前读LO,上一条指令写LO，不管上上条是否指令写LO，取的都是上一条的结果
                         || (EX_Mfhi && EX_MEM_Mthi);   
-    assign ALUSrcA[1] = (MEM_WB_RegWrite && EX_rs==MEM_WB_waddr && !(EX_MEM_RegWrite && EX_rs==EX_MEM_waddr))   
+    assign ALUSrcA[1] = (MEM_WB_RegWrite && EX_rs===MEM_WB_waddr && !(EX_MEM_RegWrite && EX_rs===EX_MEM_waddr))   
                         || (EX_Mflo && !EX_MEM_Mtlo && MEM_WB_Mtlo) || (EX_Mfhi && !EX_MEM_Mthi && MEM_WB_Mthi);// 只与上上条相关
     
     // 00:register(rt),11:imm32,01:EX_MEM_xxx,10:MEM_WB_xxx
     // assign ALUSrcB[0] = (EX_ALUSrc == 1)? 1:EX_MEM_RegWrite && EX_rt==EX_MEM_waddr;
     // assign ALUSrcB[1] = (EX_ALUSrc == 1)? 1:MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && EX_MEM_waddr!=EX_rt;
     // 不可能出现11的情况
-    assign ALUSrcB[0] = EX_MEM_RegWrite && EX_rt==EX_MEM_waddr;
-    assign ALUSrcB[1] = MEM_WB_RegWrite && EX_rt==MEM_WB_waddr && !(EX_MEM_RegWrite && EX_MEM_waddr==EX_rt);
+    assign ALUSrcB[0] = EX_MEM_RegWrite && EX_rt===EX_MEM_waddr;
+    assign ALUSrcB[1] = MEM_WB_RegWrite && EX_rt===MEM_WB_waddr && !(EX_MEM_RegWrite && EX_MEM_waddr===EX_rt);
 
     
     // 用于分支指令源数据
     assign ALUSrcC = 
-        ((ID_EX_RegWrite && ID_rs==ID_EX_waddr) || (ID_Mflo && ID_EX_Mtlo) || (ID_Mfhi && ID_EX_Mthi)) ? 2'b01:
-        ((EX_MEM_RegWrite && ID_rs==EX_MEM_waddr) || (ID_Mflo && EX_MEM_Mtlo) || (ID_Mfhi && EX_MEM_Mthi)) ? 2'b10:
-        ((MEM_WB_RegWrite && ID_rs==MEM_WB_waddr) || (ID_Mflo && MEM_WB_Mtlo ) || (ID_Mfhi && MEM_WB_Mthi)) ? 2'b11:
+        ((ID_EX_RegWrite && ID_rs===ID_EX_waddr) || (ID_Mflo && ID_EX_Mtlo) || (ID_Mfhi && ID_EX_Mthi)) ? 2'b01:
+        ((EX_MEM_RegWrite && ID_rs===EX_MEM_waddr) || (ID_Mflo && EX_MEM_Mtlo) || (ID_Mfhi && EX_MEM_Mthi)) ? 2'b10:
+        ((MEM_WB_RegWrite && ID_rs===MEM_WB_waddr) || (ID_Mflo && MEM_WB_Mtlo ) || (ID_Mfhi && MEM_WB_Mthi)) ? 2'b11:
         2'b00;
     
     assign ALUSrcD = 
-        (ID_EX_RegWrite && ID_rt==ID_EX_waddr) ? 2'b01:
-        (EX_MEM_RegWrite && ID_rt==EX_MEM_waddr) ? 2'b10:
-        (MEM_WB_RegWrite && ID_rt==MEM_WB_waddr) ? 2'b11:
+        (ID_EX_RegWrite && ID_rt===ID_EX_waddr) ? 2'b01:
+        (EX_MEM_RegWrite && ID_rt===EX_MEM_waddr) ? 2'b10:
+        (MEM_WB_RegWrite && ID_rt===MEM_WB_waddr) ? 2'b11:
         2'b00;
     
     // 用于jalr和jr的分支跳转地址（rs）

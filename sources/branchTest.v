@@ -23,6 +23,7 @@
 
 module branchTest(
     input   [5:0]   IF_op,
+    input           clock,
     // 有条件跳转 ID段传入
     input           Beq,
     input           Bne,
@@ -56,6 +57,7 @@ module branchTest(
     output   [31:0] rs
     );
     
+    
     wire [31:0] rt;
     assign rs = (ALUSrcC==2'b00) ? read_data_1 : (ALUSrcC==2'b01) ? 
     EX_ALU_result : (ALUSrcC==2'b10) ? MEM_ALU_result : WB_data;
@@ -66,7 +68,7 @@ module branchTest(
     assign Zero = rs==rt;
     assign Negative = rs[31]==1'b1;
     assign Positive = (rs[31]==1'b0&&rs!=32'd0);
-    
+
     // 有条件跳转,条件不成立时
     assign nBranch = (Beq&&!Zero)||(Bne&&Zero)||
             (Bgez&&Negative)||(Bgtz&&!Positive)||
@@ -76,8 +78,8 @@ module branchTest(
     assign JR = Jalr||Jrn;
     assign J = Jmp||Jal;
     
-    // assign IF_Flush = nBranch||JR||J;   // ID段发现预测跳转失败　或　IF段无条件跳转
-    assign IF_Flush = nBranch;
+    assign IF_Flush = nBranch||JR||J;   // ID段发现预测跳转失败　或　IF段无条件跳转
+    // assign IF_Flush = nBranch;
     assign IFBranch = IF_op==6'b000100||IF_op==6'b000101||IF_op==6'b000111||IF_op==6'b000110||IF_op==6'b000001;
 
 endmodule

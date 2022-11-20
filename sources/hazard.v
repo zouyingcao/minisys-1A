@@ -29,9 +29,9 @@ module hazard(
     output  ID_EX_stall,
     output  PC_IFWrite
     );
-    
+
     // load-use √∞œ’
-    assign ID_EX_stall = ex_MemRead && (id_rs==ex_rt|| id_rt==ex_rt);
+    assign ID_EX_stall = (ex_MemRead===1'b1) && (id_rs==ex_rt|| id_rt==ex_rt);
     assign PC_IFWrite = ~ID_EX_stall;
 
 endmodule
