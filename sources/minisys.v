@@ -342,6 +342,7 @@ module minisys (
         .Sign_extend    (sign_extend)
     );
     
+    // ÓÃÓÚload-use
     hazard hazard(
         .ex_MemRead     (ex_memread||ex_mem_ioread),
         .id_rt          (addr0),

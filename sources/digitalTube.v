@@ -50,24 +50,20 @@ module digitalTube(
          choose = 8'b00000001;
     end
      
-    always @(posedge clock)
-    begin
+    always @(posedge clock) begin
         if (counter != 8'd0)
-             counter = counter - 1'd1;
+            counter = counter - 1'd1;
         else begin
-             counter = 8'd25;
-             refresh = ~refresh;
+            counter = 8'd25;
+            refresh = ~refresh;
         end
     end
-    
-    always @(posedge refresh) begin
-        if(choose==8'b10000000)
-            choose=8'b00000001;
-        else choose=choose<<1;
-        enable=~(choose&specialDisplay[15:8]); // 特殊显示寄存器的高八位表示对应八个数码管要显示，1表示要显示数据
-    end
-    always @(choose)
-        begin
+
+    always @(posedge refresh or posedge reset) begin
+        if (digitalTubeCtrl == 0 || reset == 1) begin
+               value = 8'hff;
+               enable = 8'hff;
+        end else begin
             case(choose) // value[0]即DP
                 8'b00000001:begin datatmp=lowData[3:0];value[0]=~specialDisplay[0];end
                 8'b00000010:begin datatmp=lowData[7:4];value[0]=~specialDisplay[1];end
@@ -77,11 +73,12 @@ module digitalTube(
                 8'b00100000:begin datatmp=highData[7:4];value[0]=~specialDisplay[5];end
                 8'b01000000:begin datatmp=highData[11:8];value[0]=~specialDisplay[6];end
                 8'b10000000:begin datatmp=highData[15:12];value[0]=~specialDisplay[7];end
-            default:datatmp=4'b0000;
+                default:datatmp=4'b0000;
             endcase
-        end
-    always @(datatmp)
-        begin
+            if(choose==8'b10000000)
+                choose=8'b00000001;
+            else choose=choose<<1;
+            enable=~(choose&specialDisplay[15:8]); // 特殊显示寄存器的高八位表示对应八个数码管要显示，1表示要显示数据
             case (datatmp)
                 4'b0000: value[7:1] = 7'b0000001;// CA、CB、CC、…、CG,低电平有效
                 4'b0001: value[7:1] = 7'b1001111;
@@ -100,17 +97,12 @@ module digitalTube(
                 4'b1110: value[7:1] = 7'b0110000;
                 4'b1111: value[7:1] = 7'b0111000;
             endcase
-        end
-    always @(posedge refresh or posedge reset) begin
-        if (digitalTubeCtrl == 0 || reset == 1) begin
-            value = 8'hff;
-            enable = 8'hff;
-        end else
             if (write_enable == 1)
-            case (address)
-                3'b000: lowData = write_data_in;
-                3'b010: highData = write_data_in;
-                3'b100: specialDisplay = write_data_in;
-            endcase
+                case (address)
+                    3'b000: lowData = write_data_in;
+                    3'b010: highData = write_data_in;
+                    3'b100: specialDisplay = write_data_in;
+                endcase
+        end
     end
 endmodule

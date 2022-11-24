@@ -86,11 +86,9 @@ module timer(
                     end
             endcase
         end
-    end
-
-    always @(posedge clock) begin
         if(status0[15])begin                // 定时/计数有效
             CNT0 <= CNT0 - 16'd1;           // 当前值-1
+            CTC0_output = 1'b1;
             if (mode0[0] == 1'b0) begin     // 定时模式  
                 if (CNT0 == 16'd1) begin   
                     status0[15] = 1'b0;     // 表示定时无效
@@ -105,25 +103,20 @@ module timer(
                 end
             end
         end
-    end
-    
-    always @(negedge clock) begin
         if (CTC0_output == 1'b0) begin
             if (mode0[1] == 1'b1) begin // 重复模式
                 status0[15] = 1'b1;
                 status0[0] = 1'b0; 
                 CNT0 = init0;
-                CTC0_output = 1'b1;
+                // CTC0_output = 1'b1;
             end else begin // 非重复模式
                 status0[15] = 1'b0;
                 CNT0 = 16'h0000;
             end
         end
-    end
-    
-    always @(posedge clock) begin
         if(status1[15])begin            // 定时/计数有效
             CNT1 <= CNT1 - 16'd1;           // 当前值-1
+            CTC1_output = 1'b1;
             if (mode1[0] == 1'b0) begin     // 定时模式  
                 if (CNT1 == 16'd1) begin    // 设置状态寄存器有效位为0，
                     status1[15] = 1'b0;     // 表示定时无效
@@ -138,21 +131,26 @@ module timer(
                 end
             end
         end
-    end
-    
-    // 重复模式检测
-    always @(negedge clock) begin
         if (CTC1_output == 1'b0) begin
             if (mode1[1] == 1'b1) begin // 重复模式
                 status1[15] = 1'b1;
                 status1[0] = 1'b0; 
                 CNT1 = init1;
-                CTC1_output = 1'b1;
+                // CTC1_output = 1'b1;
         end else begin // 非重复模式
                 status1[15] = 1'b0;
                 CNT1 = 16'h0000;
             end
         end
     end
+
+//    always @(posedge clock) begin
+
+//    end
+    
+//    // 重复模式检测
+//    always @(negedge clock) begin
+
+//    end
   
 endmodule
