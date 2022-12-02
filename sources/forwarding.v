@@ -83,5 +83,6 @@ module forwarding(
         2'b00;
     
     // 用于jalr和jr的分支跳转地址（rs）
-    // assign ALUSrcE = ;
+//    assign ALUSrcE = 
+//        (ID_EX_RegWrite && ID_rs===ID_EX_waddr);
 endmodule

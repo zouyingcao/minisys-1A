@@ -104,6 +104,7 @@ module minisys (
     wire [31:0] read_data_1;            // 从寄存器读出的(rs)
     wire [31:0] read_data_2;            // 从寄存器读出的(rt)
     wire [31:0] write_register_data;    // 要写入寄存器的数据
+    wire [4:0] write_address;           // 写入的寄存器号
     wire [4:0] addr0,addr1,rs;          // rt,rd,rs
     wire [31:0] sign_extend;            // 立即数符号扩展
     
@@ -331,6 +332,7 @@ module minisys (
         .write_address_0(addr0),           // rt
         .write_address_1(addr1),           // rd
         .write_data     (write_register_data),
+        .write_register_address(write_address),
         .rs             (rs),
         .Jump_PC        (jump_PC),
         .Jal            (wb_jal),
@@ -489,7 +491,7 @@ module minisys (
         .EX_MEM_Mthi    (mem_wb_mthi),
          
         .MEM_WB_RegWrite(wb_regwrite),
-        .MEM_WB_waddr   (wb_waddr),
+        .MEM_WB_waddr   (write_address),
         .MEM_WB_Mtlo    (wb_mtlo),
         .MEM_WB_Mthi    (wb_mthi),
     
@@ -501,7 +503,7 @@ module minisys (
 
     Executs32 execute(
         .clock          (cpu_clk),
-        .PC_plus_4      (wb_opcplus4),
+        .PC_plus_4      (wb_opcplus4),////????
         .Read_data_1	(ex_dataA),
         .Read_data_2	(ex_dataB),
         .address0       (ex_address0),
@@ -520,7 +522,10 @@ module minisys (
         .I_format       (ex_i_format),
         .Sftmd          (ex_sftmd),
         .DivSel         (ex_divsel),
+        .opcplus4       (ex_mem_opcplus4),
         .Jrn            (ex_jr),
+        .Jal            (ex_mem_jal),
+        .Jalr           (ex_mem_jalr),
         
         .Mfhi           (ex_mem_mfhi),
         .Mflo           (ex_mem_mflo),

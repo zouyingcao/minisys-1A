@@ -19,7 +19,10 @@ module Executs32 (
     input	[1:0]	ALUSrcA,			
     input   [1:0]   ALUSrcB,
     input			I_format,			// 来自控制单元，表明是除beq, bne, LW, SW之外的I-类型指令
+    input   [31:0]  opcplus4,
     input			Jrn,				// 来自控制单元，书名是JR指令
+    input           Jal,                // Jal指令
+    input           Jalr,               // Jalr指令
     input           RegDst,
     
     input           Mfhi,               //是否为读写HI/LO寄存器的指令
@@ -77,7 +80,7 @@ module Executs32 (
     assign ALU_ctl[0] = Exe_code[0] & ALUOp[1]; 
     assign ALU_ctl[1] = ((!Exe_code[2]) | (!ALUOp[1]));
     assign ALU_ctl[2] = (Exe_code[1] & ALUOp[1]) | ALUOp[0];
-    assign address = RegDst ? address1 : address0;
+    assign address = Jal ? 5'd31:RegDst ? address1 : address0;
     assign rd = address1;
 
 	always @* begin  // 6种移位指令
@@ -202,7 +205,8 @@ module Executs32 (
         else if((ALU_ctl==3'b101) && (I_format==1)) 
             ALU_Result[31:0] = {Binput,16'd0};          // lui data
         else if(Sftmd) ALU_Result = Sinput;             //  移位
-        else  ALU_Result = ALU_output_mux[31:0];        // otherwise
+        else if(Jalr||Jal) ALU_Result = opcplus4;
+        else ALU_Result = ALU_output_mux[31:0];        // otherwise
     end
     
 endmodule
