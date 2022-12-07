@@ -61,7 +61,7 @@ module keyboard(
                         state = 3'b010;
                     end
                 end
-                3'b010:begin // 第一行(0,F,E,D)
+                3'b010:begin // 第一行(1,2,3,A)
                     if(column == 4'b1111)begin
                         row = 4'b1101;
                         state = 3'b011;
@@ -70,16 +70,16 @@ module keyboard(
                         value[3:0] = column;
                         value[7:4] = row;
                         if(column == 4'b1110)
-                            value[11:8] = 4'hD;
+                            value[11:8] = 4'h1;
                         else if(column == 4'b1101)
-                            value[11:8] = 4'hF;
+                            value[11:8] = 4'h2;
                         else if(column == 4'b1011)
-                            value[11:8] = 4'h0;
+                            value[11:8] = 4'h3;
                         else if(column == 4'b0111)
-                            value[11:8] = 4'hE;
+                            value[11:8] = 4'hA;
                     end
                 end 
-                3'b011:begin // 第二行(7,8,9,C)
+                3'b011:begin // 第二行(4,5,6,B)
                     if(column == 4'b1111)begin
                         row = 4'b1011;
                         state = 3'b100;
@@ -88,16 +88,16 @@ module keyboard(
                         value[3:0] = column;
                         value[7:4] = row;
                         if(column == 4'b1110)
-                            value[11:8] = 4'hC;
+                            value[11:8] = 4'h4;
                         else if(column == 4'b1101)
-                            value[11:8] = 4'h9;
+                            value[11:8] = 4'h5;
                         else if(column == 4'b1011)
-                            value[11:8] = 4'h8;
+                            value[11:8] = 4'h6;
                         else if(column == 4'b0111)
-                            value[11:8] = 4'h7;
+                            value[11:8] = 4'hB;
                     end
                 end   
-                3'b100:begin // 第三行(4,5,6,B)
+                3'b100:begin // 第三行(7,8,9,C)
                     if(column == 4'b1111)begin
                         row = 4'b0111;
                         state = 3'b101;
@@ -106,16 +106,16 @@ module keyboard(
                         value[3:0] = column;
                         value[7:4] = row;
                         if(column == 4'b1110)
-                            value[11:8] = 4'hB;
+                            value[11:8] = 4'h7;
                         else if(column == 4'b1101)
-                            value[11:8] = 4'h6;
+                            value[11:8] = 4'h8;
                         else if(column == 4'b1011)
-                            value[11:8] = 4'h5;
+                            value[11:8] = 4'h9;
                         else if(column == 4'b0111)
-                            value[11:8] = 4'h4;
+                            value[11:8] = 4'hC;
                     end
                 end  
-                3'b101:begin // 第四行(1,2,3,A)
+                3'b101:begin // 第四行(*/E,0,#/F,D)
                     if(column == 4'b1111)begin
                         row = 4'b0000;
                         state = 3'b000;
@@ -124,20 +124,20 @@ module keyboard(
                         value[3:0] = column;
                         value[7:4] = row;
                         if(column == 4'b1110)
-                            value[11:8] = 4'hA;
+                            value[11:8] = 4'hE;
                         else if(column == 4'b1101)
-                            value[11:8] = 4'h3;
+                            value[11:8] = 4'h0;
                         else if(column == 4'b1011)
-                            value[11:8] = 4'h2;
+                            value[11:8] = 4'hF;
                         else if(column == 4'b0111)
-                            value[11:8] = 4'h1;
+                            value[11:8] = 4'hD;
                     end
                 end  
             endcase
 
         if (read_enable == 1)
             case (address)
-                3'b000: read_data_output = value; // {4'd0,column,row,value},键值寄存器(0FFFFFC10H)
+                3'b000: read_data_output = value; // {4'd0,value,row,column},键值寄存器(0FFFFFC10H)
                 3'b010: // 状态寄存器(0XFFFFFC12)
                     read_data_output = (state > 3'd1) ? 16'd1:16'd0;
                 default: read_data_output = 16'hZZZZ;
