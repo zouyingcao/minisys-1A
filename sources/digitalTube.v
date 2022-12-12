@@ -36,11 +36,13 @@ module digitalTube(
     reg [15:0] specialDisplay;      // 特殊显示寄存器
     reg [7:0] choose;
     reg [3:0] datatmp;
+    reg [6:0] C_out;
+    reg DP;
+    
     //分频，降低刷新速率，否则会出现显示不全/错误的情况
     reg        refresh;
     reg[7:0]   counter;
 
-    
     initial begin
          counter = 8'd0;
          refresh = 1'b0;
@@ -54,15 +56,15 @@ module digitalTube(
         if (counter != 8'd0)
             counter = counter - 1'd1;
         else begin
-            counter = 8'd25;
+            counter = 8'hff;
             refresh = ~refresh;
         end
     end
-
+    
     always @(posedge refresh or posedge reset) begin
-        if (digitalTubeCtrl == 0 || reset == 1) begin
-               value = 8'hff;
-               enable = 8'hff;
+        if (reset == 1) begin
+            value = 8'hff;
+            enable = 8'hff;
         end else begin
             case(choose) // value[0]即DP
                 8'b00000001:begin datatmp=lowData[3:0];value[0]=~specialDisplay[0];end
@@ -75,9 +77,6 @@ module digitalTube(
                 8'b10000000:begin datatmp=highData[15:12];value[0]=~specialDisplay[7];end
                 default:datatmp=4'b0000;
             endcase
-            if(choose==8'b10000000)
-                choose=8'b00000001;
-            else choose=choose<<1;
             enable=~(choose&specialDisplay[15:8]); // 特殊显示寄存器的高八位表示对应八个数码管要显示，1表示要显示数据
             case (datatmp)
                 4'b0000: value[7:1] = 7'b0000001;// CA、CB、CC、…、CG,低电平有效
@@ -97,6 +96,9 @@ module digitalTube(
                 4'b1110: value[7:1] = 7'b0110000;
                 4'b1111: value[7:1] = 7'b0111000;
             endcase
+            if(choose==8'b10000000)
+                choose=8'b00000001;
+            else choose=choose<<1;
             if (write_enable == 1)
                 case (address)
                     3'b000: lowData = write_data_in;
