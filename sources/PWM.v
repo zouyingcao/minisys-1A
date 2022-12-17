@@ -24,7 +24,6 @@ module PWM(
     input clock,
     input reset,
     input write_enable,//写信号
-    input pwmCtrl,//PWM片选信号
     input [15:0] write_data_in,
     input [2:0] address,//到PWM模块的地址低端（此处为30/32/34）
     output reg PWM_output

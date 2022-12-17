@@ -48,10 +48,14 @@ module forwarding(
     input           MEM_WB_Mtlo,
     input           MEM_WB_Mthi,
 
+    // mfc0,mtc0
+    input  [4:0]    EX_rd,
+
     output  [1:0]   ALUSrcA,
     output  [1:0]   ALUSrcB,
     output  [1:0]   ALUSrcC,
-    output  [1:0]   ALUSrcD//,
+    output  [1:0]   ALUSrcD,
+    output  [1:0]   ALUSrcF//,
     //output  [1:0]   ALUSrcE
     );
     // 01:register(rs),01;EX_MEM_xxx,10:MEM_WB_xxx
@@ -68,6 +72,8 @@ module forwarding(
     assign ALUSrcB[0] = EX_MEM_RegWrite && EX_rt===EX_MEM_waddr;
     assign ALUSrcB[1] = MEM_WB_RegWrite && EX_rt===MEM_WB_waddr && !(EX_MEM_RegWrite && EX_MEM_waddr===EX_rt);
 
+    assign ALUSrcF[0] = EX_MEM_RegWrite && EX_rd===EX_MEM_waddr;
+    assign ALUSrcF[1] = MEM_WB_RegWrite && EX_rd===MEM_WB_waddr && !(EX_MEM_RegWrite && EX_MEM_waddr===EX_rd);
     
     // 用于分支指令源数据
     assign ALUSrcC = 

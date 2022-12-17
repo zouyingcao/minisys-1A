@@ -24,7 +24,6 @@ module buzzer(
     input clock,
     input reset,
     input write_enable,     // Ğ´ĞÅºÅ
-    input buzzerCtrl,       // ·äÃùÆ÷Æ¬Ñ¡ĞÅºÅ
     input [15:0] write_data_in,
     output reg buzzer_output
     );

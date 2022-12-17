@@ -2,10 +2,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module Executs32 (
-    input           clock,
-    input   [31:0]  PC_plus_4,           // PC+4
+    input   [31:0]  PC_plus_4,          // PC+4
     input	[31:0]	Read_data_1,		// 从译码单元的Read_data_1中来
     input	[31:0]	Read_data_2,		// 从译码单元的Read_data_2中来
+    input	[31:0]	read_rd_value,		// 译码单元的(rd)
     input   [1:0]   ALUOp,              // 来自控制单元的运算指令控制编码
     input	[31:0]	Sign_extend,		// 从译码单元来的扩展后的立即数
     input	[5:0]	Func,	            // 取指单元来的r-类型指令功能码,r-form instructions[5:0]
@@ -18,6 +18,7 @@ module Executs32 (
     input           ALUSrc,
     input	[1:0]	ALUSrcA,			
     input   [1:0]   ALUSrcB,
+    input   [1:0]   ALUSrcF,
     input			I_format,			// 来自控制单元，表明是除beq, bne, LW, SW之外的I-类型指令
     input   [31:0]  opcplus4,
     input			Jrn,				// 来自控制单元，书名是JR指令
@@ -34,6 +35,8 @@ module Executs32 (
     input   [31:0]  EX_MEM_ALU_result,  // 与前一条指令存在写后读冒险
     input   [31:0]  WB_data,            // 只与前前条指令存在冒险
     
+    output   [31:0] rd_value,           
+    
     output			Zero,				// 为1表明计算值为0 
     output          Positive,           // rs是否为正
     output          Negative,           // rs是否为负
@@ -43,7 +46,6 @@ module Executs32 (
     output  [4:0]   address,   
     output reg[31:0]ALU_Result,			// 计算的数据结果
     output	[31:0]	rt_value,
-    output  [4:0]   rd,
     output	[31:0]	Add_Result			// 计算的地址结果     
 );
 
@@ -69,6 +71,7 @@ module Executs32 (
     // assign Binput = (ALUSrcB==2'b00) ? Read_data_2 : (ALUSrcB==2'b01) ? EX_MEM_ALU_result : (ALUSrcB==2'b10) ? WB_data : Sign_extend[31:0]; 
     assign Binput = (ALUSrc==1'b1) ? Sign_extend[31:0]:(ALUSrcB==2'b00) ? Read_data_2 : (ALUSrcB==2'b01) ? EX_MEM_ALU_result : WB_data;
     assign rt_value = (ALUSrcB==2'b00) ? Read_data_2 : (ALUSrcB==2'b01) ? EX_MEM_ALU_result : WB_data;
+    assign rd_value = (ALUSrcF==2'b00) ? read_rd_value : (ALUSrcF==2'b01) ? EX_MEM_ALU_result : WB_data;
     
     wire signed [31:0] s_Ainput;
     wire signed [31:0] s_Binput;
@@ -81,7 +84,7 @@ module Executs32 (
     assign ALU_ctl[1] = ((!Exe_code[2]) | (!ALUOp[1]));
     assign ALU_ctl[2] = (Exe_code[1] & ALUOp[1]) | ALUOp[0];
     assign address = Jal ? 5'd31:RegDst ? address1 : address0;
-    assign rd = address1;
+
 
 	always @* begin  // 6种移位指令
        if(Sftmd)
@@ -99,7 +102,7 @@ module Executs32 (
  
     assign Add_Result = PC_plus_4[31:0] + {Sign_extend[29:0],2'b00};    // 给取指单元作为beq和bne指令的跳转地址 ？？？
 
-    always @(ALU_ctl or Ainput or Binput) begin //进行算数逻辑运算
+    always @(*) begin //进行算数逻辑运算
         case(ALU_ctl)
             3'b000:ALU_output_mux = Ainput & Binput;                    // and,andi
             3'b001:ALU_output_mux = Ainput | Binput;                    // or,ori
@@ -136,20 +139,8 @@ module Executs32 (
     wire [31:0] test42=s_Ainput%s_Binput;
     
     // 有符号乘法
-//    multiplier_signed mul_signed(
-//        .CLK(clock),
-//        .A(Ainput),
-//        .B(Binput),
-//        .P(mul_signed_result)
-//    );
     assign mul_signed_result=s_Ainput*s_Binput;
     // 无符号乘法
-//    multiplier_unsigned mul_unsigned(
-//        .CLK(clock),
-//        .A(Ainput),
-//        .B(Binput),
-//        .P(mul_unsigned_result)
-//    );
     assign mul_unsigned_result=Ainput*Binput;
     
     // 有符号除法

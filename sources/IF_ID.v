@@ -25,6 +25,8 @@ module IF_ID(
     input reset,
     input flush,                      // IF/ID寄存器清空信号
     input PCWrite,
+    input backFromEret,               // 从中断返回
+    output reg ID_backFromEret,
     input [31:0] IF_PC,               
     input [31:0] IF_opcplus4,         //取指单元输出锁存的PC+4
     input [31:0] IF_instruction,      //取指单元输出指令
@@ -34,6 +36,7 @@ module IF_ID(
     );
     
     always @(negedge cpu_clk or posedge reset) begin
+        ID_backFromEret = backFromEret;
         if(reset)begin
             ID_EX_PC = 32'd0;
             ID_instruction = 32'd0;

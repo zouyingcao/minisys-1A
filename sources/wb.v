@@ -28,7 +28,7 @@ module wb(
     input           Mfc0,      
     output [31:0]   wb_data
     );
-    
-    assign wb_data = Mfc0 ? cp0_data_in : MemIOtoReg ? read_data : ALU_result;
+    //||cp0_wen===1'b1
+    assign wb_data = (Mfc0===1'b1) ? cp0_data_in : MemIOtoReg ? read_data : ALU_result;
     
 endmodule

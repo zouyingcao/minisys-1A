@@ -24,7 +24,6 @@ module watchdog(
     input clock,
     input reset,
     input write_enable,                 // 写信号
-    input watchdogCtrl,                 // WDT片选信号
     output reg WDT_output               // 通知CPU复位
     );
     reg[15:0]   counter;                //计数器

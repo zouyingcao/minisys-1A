@@ -38,7 +38,7 @@ module memorio (
     assign LEDCtrl = ((iorw==1) && (caddress[31:4] == 28'hFFFFFC6)) ? 1'b1:1'b0;
     assign SwitchCtrl = ((iorw==1) && (caddress[31:4] == 28'hFFFFFC7)) ? 1'b1:1'b0;
 	assign BuzzerCtrl = ((iorw==1) && (caddress[31:4] == 28'hFFFFFD1)) ? 1'b1:1'b0;
-							
+	
     always @(*) begin
         if(memwrite||iowrite) begin
             write_data = wdata;

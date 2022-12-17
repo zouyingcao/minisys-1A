@@ -25,13 +25,15 @@ module hazard(
     input   [4:0]   id_rt,
     input   [4:0]   id_rs,
     input   [4:0]   ex_rt,
+    
+    input   ex_Mfc0,
 
     output  ID_EX_stall,
     output  PC_IFWrite
     );
 
-    // load-use √∞œ’
-    assign ID_EX_stall = (ex_MemRead===1'b1) && (id_rs==ex_rt|| id_rt==ex_rt);
+    // load-use √∞œ’,Mfc0√∞œ’
+    assign ID_EX_stall = (ex_MemRead===1'b1||ex_Mfc0===1'b1) && (id_rs==ex_rt|| id_rt==ex_rt);
     assign PC_IFWrite = ~ID_EX_stall;
 
 endmodule

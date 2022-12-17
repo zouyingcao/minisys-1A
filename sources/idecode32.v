@@ -7,7 +7,7 @@ module Idecode32 (
     input  [31:0]   opcplus4,      
     input  [31:0]	Instruction,	// 取指单元来的指令
     input  [31:0]	wb_data,		// 从DATA RAM or I/O port取出的数据
-    input  [31:0]	ALU_result,		// 从执行单元来的运算的结果，需要扩展立即数到32位
+    //input  [31:0]	ALU_result,		// 从执行单元来的运算的结果，需要扩展立即数到32位
     input  [4:0]    waddr,
     
     input			Jal,			// jal
@@ -16,6 +16,7 @@ module Idecode32 (
     input           Bltzal,
     input           Negative,
     input			RegWrite,		
+    //input           Mfc0,
     
     output [25:0]   Jump_PC,
     output [31:0]   read_data_1,    // 输出的第一操作数
@@ -25,7 +26,8 @@ module Idecode32 (
     output [31:0]   write_data,     // 要写入寄存器的数据
     output [4:0]    write_register_address, //地址：要写的寄存器的号
     output [31:0]	Sign_extend,	// 译码单元输出的扩展后的32位立即数
-    output [4:0]    rs              // rs
+    output [4:0]    rs,              // rs
+    output [31:0]   rd_value
 );
     
     reg[31:0] register[0:31];			        // 寄存器组共32个32位寄存器
@@ -49,6 +51,7 @@ module Idecode32 (
     
     assign read_data_1 = register[rs];
     assign read_data_2 = register[rt];
+    assign rd_value = register[write_address_1];
     assign write_data = (Jal || Jalr || Bgezal || Bltzal) ? opcplus4 : wb_data; // ($31)←(PC)+4(jal,bgezal,bltzal)或(rd)←(PC)+4(jalr)
     assign write_register_address = (Jal || (Bgezal && !Negative) || (Bltzal && Negative))? 5'd31:(Bgezal||Bltzal)?5'd0: waddr;
 //    always @* begin                              // 这个进程指定不同指令下的目标寄存器

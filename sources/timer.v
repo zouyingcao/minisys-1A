@@ -27,7 +27,6 @@ module timer(
     input pluse1,
     input read_enable,              // 读信号
     input write_enable,             // 写信号
-    input timerCtrl,                // 定时器/计数器片选信号
     input [2:0] address,            // 方式寄存器：0/2，初始值寄存器：4/6
     input[15:0] write_data_in,      // 写到CTC模块的数据
     output reg[15:0] read_data_out,// 从CTC模块读到CPU的数据

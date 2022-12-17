@@ -119,15 +119,16 @@ module control32 (
     assign Memory_sign = !op[2];
     assign Memory_data_width = op[1:0];
     
-    wire valueLogicR = (op===6'b000000&&shamt===5'b00000&&func[5:3]===3'b100);//add,addu,sub,subu,and,or,xor,nor
-    wire mulAndDiv = (op===6'b000000&&rd===5'b00000&&shamt===5'b00000&&func[5:2]===4'b0110);//mult,multu,div,divu
-    wire Rcmp = (op===6'b000000&&shamt===5'b00000&&func[5:1]===5'b10101);//slt,sltu
-    wire R31 = valueLogicR||mulAndDiv||Mfhi||Mflo||Mthi||Mtlo||Mfc0||Mtc0||Sftmd||Jrn||Jalr||Break||Syscall||Eret||Rcmp;
-    wire valueLogicI = (I_format&&((op===6'b001111)?(rs==5'b00000):1'b1));//addi,addiu,andi,ori,xori,lui,slti,sltiu
-    wire L5 = (L_format&&(!(op[2:0]===3'b111||op[2:0]===3'b110||op[2:0]===3'b010)));//lb,lbu,lh,lhu,lw
-    wire S3 = (S_format&&op[1:0]!=2'b10);//sb,sh,sw
-    wire I24 = valueLogicI||L5||S3||Beq||Bne||Bgez||Bgtz||Blez||Bltz||Bgezal||Bltzal;
-    wire J2 = Jmp||Jal;
+    wire valueLogicR,mulAndDiv,Rcmp,R31,valueLogicI,L5,S3,I24,J2;
+    assign valueLogicR = (op===6'b000000&&shamt===5'b00000&&func[5:3]===3'b100);//add,addu,sub,subu,and,or,xor,nor
+    assign mulAndDiv = (op===6'b000000&&rd===5'b00000&&shamt===5'b00000&&func[5:2]===4'b0110);//mult,multu,div,divu
+    assign Rcmp = (op===6'b000000&&shamt===5'b00000&&func[5:1]===5'b10101);//slt,sltu
+    assign R31 = valueLogicR||mulAndDiv||Mfhi||Mflo||Mthi||Mtlo||Mfc0||Mtc0||Sftmd||Jrn||Jalr||Break||Syscall||Eret||Rcmp;
+    assign valueLogicI = (I_format&&((op===6'b001111)?(rs==5'b00000):1'b1));//addi,addiu,andi,ori,xori,lui,slti,sltiu
+    assign L5 = (L_format&&(!(op[2:0]===3'b111||op[2:0]===3'b110||op[2:0]===3'b010)));//lb,lbu,lh,lhu,lw
+    assign S3 = (S_format&&op[1:0]!=2'b10);//sb,sh,sw
+    assign I24 = valueLogicI||L5||S3||Beq||Bne||Bgez||Bgtz||Blez||Bltz||Bgezal||Bltzal;
+    assign J2 = Jmp||Jal;
     assign Reserved_instruction = !(R31||I24||J2);//保留指令（未实现的指令）异常
 
     assign RegWrite = R_format? (func[5:3]===3'b100||func[5:1]===5'b10101||Mfhi||Mflo||Mfc0||Sftmd||Jalr):

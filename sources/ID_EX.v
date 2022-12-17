@@ -25,6 +25,7 @@ module ID_EX(
     input reset,
     input flush,
     input stall,
+    input ID_backFromEret,
     input [31:0] ID_opcplus4,
     input [31:0] IF_ID_PC,
     input [31:0] ID_dataA,
@@ -38,6 +39,7 @@ module ID_EX(
     input [4:0]  ID_address0,
     input [4:0]  ID_address1,
     input [4:0]  ID_rs,
+    input [31:0]  ID_rd_value,
     input ID_RegDst,
     input ID_Sftmd,	
     input ID_DivSel,
@@ -50,11 +52,11 @@ module ID_EX(
     input ID_Jal,
     
     input ID_RegWrite,      //传去EX_MEM
-    input ID_MemIOtoReg,
-    input ID_MemWrite,
-    input ID_MemRead,
-    input ID_IORead,
-    input ID_IOWrite,
+//    input ID_MemIOtoReg,
+//    input ID_MemWrite,
+//    input ID_MemRead,
+//    input ID_IORead,
+//    input ID_IOWrite,
     input ID_Memory_sign,
     input [1:0] ID_Memory_data_width,
     
@@ -79,6 +81,7 @@ module ID_EX(
     input ID_Eret,
     input ID_Reserved_instruction,
     
+    output reg EX_backFromEret,
     output reg[31:0] EX_MEM_opcplus4,
     output reg[31:0] EX_MEM_PC,
     output reg[31:0] EX_dataA,
@@ -92,6 +95,7 @@ module ID_EX(
     output reg[5:0]  EX_op,
     output reg[4:0]  EX_shamt,
     output reg[31:0] EX_Sign_extend,
+    output reg[31:0] EX_MEM_rd_value,
     output reg EX_RegDst,
     output reg EX_Sftmd,    
     output reg EX_DivSel,
@@ -104,11 +108,11 @@ module ID_EX(
     output reg EX_MEM_Jal,
     
     output reg EX_MEM_RegWrite,      //传去EX_MEM
-    output reg EX_MEM_MemIOtoReg,
-    output reg EX_MEM_MemWrite,
-    output reg EX_MemRead,
-    output reg EX_MEM_IORead,
-    output reg EX_MEM_IOWrite,
+//    output reg EX_MEM_MemIOtoReg,
+//    output reg EX_MEM_MemWrite,
+//    output reg EX_MemRead,
+//    output reg EX_MEM_IORead,
+//    output reg EX_MEM_IOWrite,
     output reg EX_MEM_Memory_sign,
     output reg [1:0] EX_MEM_Memory_data_width,
     
@@ -135,6 +139,8 @@ module ID_EX(
     );
     
     always @(negedge cpu_clk or posedge reset or posedge flush) begin
+        EX_backFromEret = ID_backFromEret;
+        EX_MEM_rd_value = ID_rd_value;
         if(reset||flush)begin
             EX_MEM_opcplus4 = 32'd0;
             EX_MEM_PC = 32'd0;
@@ -145,6 +151,7 @@ module ID_EX(
             EX_address0 = 5'd0;
             EX_address1 = 5'd0;
             EX_rs = 5'd0;
+            //EX_MEM_rd_value = ID_rd_value;
             EX_func = 6'd0;
             EX_op = 6'd0;
             EX_shamt = 5'd0;
@@ -161,11 +168,11 @@ module ID_EX(
             EX_MEM_Jal = 1'd0;
         
             EX_MEM_RegWrite = 1'd0;
-            EX_MEM_MemIOtoReg = 1'd0;
-            EX_MEM_MemWrite = 1'd0;
-            EX_MemRead = 1'd0;
-            EX_MEM_IORead = 1'd0;
-            EX_MEM_IOWrite = 1'd0;
+//            EX_MEM_MemIOtoReg = 1'd0;
+//            EX_MEM_MemWrite = 1'd0;
+//            EX_MemRead = 1'd0;
+//            EX_MEM_IORead = 1'd0;
+//            EX_MEM_IOWrite = 1'd0;
             EX_MEM_Memory_sign = 1'd0;
             EX_MEM_Memory_data_width = 2'd0;
         
@@ -200,6 +207,7 @@ module ID_EX(
             EX_address0 = ID_address0;
             EX_address1 = ID_address1;
             EX_rs = ID_rs;
+            //EX_MEM_rd_value = ID_rd_value;
             EX_func = ID_func;
             EX_op = ID_op;
             EX_shamt = ID_shamt;
@@ -216,11 +224,11 @@ module ID_EX(
             EX_MEM_Jal = 1'd0;
         
             EX_MEM_RegWrite = 1'd0;
-            EX_MEM_MemIOtoReg = 1'd0;
-            EX_MEM_MemWrite = 1'd0;
-            EX_MemRead = 1'd0;
-            EX_MEM_IORead = 1'd0;
-            EX_MEM_IOWrite = 1'd0;
+//            EX_MEM_MemIOtoReg = 1'd0;
+//            EX_MEM_MemWrite = 1'd0;
+//            EX_MemRead = 1'd0;
+//            EX_MEM_IORead = 1'd0;
+//            EX_MEM_IOWrite = 1'd0;
             EX_MEM_Memory_sign = 1'd0;
             EX_MEM_Memory_data_width = 2'd0;
         
@@ -254,6 +262,7 @@ module ID_EX(
             EX_address0 = ID_address0;
             EX_address1 = ID_address1;
             EX_rs = ID_rs;
+            EX_MEM_rd_value = ID_rd_value;
             EX_func = ID_func;
             EX_op = ID_op;
             EX_shamt = ID_shamt;
@@ -270,11 +279,11 @@ module ID_EX(
             EX_MEM_Jal = ID_Jal;
             
             EX_MEM_RegWrite = ID_RegWrite;      //传去EX_MEM
-            EX_MEM_MemIOtoReg = ID_MemIOtoReg;
-            EX_MEM_MemWrite = ID_MemWrite;
-            EX_MemRead = ID_MemRead;
-            EX_MEM_IORead = ID_IORead;
-            EX_MEM_IOWrite = ID_IOWrite;
+//            EX_MEM_MemIOtoReg = ID_MemIOtoReg;
+//            EX_MEM_MemWrite = ID_MemWrite;
+//            EX_MemRead = ID_MemRead;
+//            EX_MEM_IORead = ID_IORead;
+//            EX_MEM_IOWrite = ID_IOWrite;
             EX_MEM_Memory_sign = ID_Memory_sign;
             EX_MEM_Memory_data_width = ID_Memory_data_width;
         

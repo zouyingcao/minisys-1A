@@ -36,7 +36,7 @@ module MEM_WB(
     input [31:0] MEM_MemorIOData,
     input [31:0] EX_MEM_rt_value,
     input [4:0] EX_MEM_waddr,
-    input [4:0] EX_MEM_rd,
+    input [31:0] EX_MEM_rd,
     input EX_MEM_Jal,
     input EX_MEM_Jalr,
     input EX_MEM_Bgezal,
@@ -51,6 +51,9 @@ module MEM_WB(
     input EX_MEM_Break,
     input EX_MEM_Eret,
     input EX_MEM_Reserved_instruction,
+    
+    input MEM_backFromEret,
+    output reg WB_backFromEret,
     
     output reg WB_RegWrite,
     output reg WB_MemIOtoReg,
@@ -80,11 +83,13 @@ module MEM_WB(
     output reg[31:0] WB_ALU_Result,
     output reg[31:0] WB_MemorIOData,
     output reg[31:0] WB_rt_value,
-    output reg[4:0]  WB_rd,
+    output reg[31:0] WB_rd,
     output reg[4:0]  WB_waddr
     
     );
-    always @(negedge clock or posedge reset or posedge flush) begin
+    always @(negedge clock or posedge reset) begin
+        WB_backFromEret = MEM_backFromEret;
+        WB_rd = EX_MEM_rd;
         if(reset||flush) begin
             WB_RegWrite = 1'b0;
             WB_MemIOtoReg = 1'b0;
@@ -114,7 +119,7 @@ module MEM_WB(
             WB_MemorIOData = 32'd0;
             WB_waddr = 5'd0;
             WB_rt_value = 32'd0;
-            WB_rd = 5'd0;
+            //WB_rd = EX_MEM_rd;
         end else begin
             WB_RegWrite = EX_MEM_RegWrite;
             WB_MemIOtoReg = EX_MEM_MemIOtoReg;
@@ -144,7 +149,7 @@ module MEM_WB(
             WB_MemorIOData = MEM_MemorIOData;
             WB_waddr = EX_MEM_waddr;
             WB_rt_value = EX_MEM_rt_value;
-            WB_rd = EX_MEM_rd;
+            //WB_rd = EX_MEM_rd;
         end
     end
 endmodule

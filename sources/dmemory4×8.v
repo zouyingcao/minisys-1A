@@ -27,15 +27,15 @@ module dmemory4x8(
     input           ram_sign,
     input	[15:0]	ram_adr_i,		// 来自memorio模块，源头是来自执行单元算出的alu_result,存储地址
     input	[31:0]	ram_dat_i,		// 来自译码单元的read_data2
-    output   reg   bit_error,
-    output reg[31:0]ram_dat_o,		// 从存储器中获得的数据
+    output   reg    bit_error,
+    output reg[31:0] ram_dat_o		// 从存储器中获得的数据
 	// UART Programmer Pinouts
-	input           upg_rst_i,      // UPG reset (Active High)
-	input           upg_clk_i,      // UPG ram_clk_i (10MHz)
-	input           upg_wen_i,		// UPG write enable
-	input	[13:0]	upg_adr_i,		// UPG write address
-	input	[31:0]	upg_dat_i,		// UPG write data
-	input           upg_done_i      // 1 if programming is finished
+//	input           upg_rst_i,      // UPG reset (Active High)
+//	input           upg_clk_i,      // UPG ram_clk_i (10MHz)
+//	input           upg_wen_i,		// UPG write enable
+//	input	[13:0]	upg_adr_i,		// UPG write address
+//	input	[31:0]	upg_dat_i,		// UPG write data
+//	input           upg_done_i      // 1 if programming is finished
     );
     
     wire ram_clk = ram_clk_i;	    // 因为使用Block ram的固有延迟，RAM的地址线来不及在时钟上升沿准备好,
@@ -43,7 +43,7 @@ module dmemory4x8(
                                     // 备好要晚大约半个时钟，从而得到正确地址。
                                  
     // kickOff = 1的时候CPU 正常工作，否则就是串口下载程序。
-    wire kickOff = upg_rst_i | (~upg_rst_i & upg_done_i);
+    // wire kickOff = upg_rst_i | (~upg_rst_i & upg_done_i);
     reg [3:0] ram_wen;
     wire [7:0] ram_data0,ram_data1,ram_data2,ram_data3;
     
@@ -71,33 +71,61 @@ module dmemory4x8(
     end
     
     ram0 ram0 (
-        .clka     (kickOff ?    ram_clk      : upg_clk_i),
-        .wea      (kickOff ?    ram_wen[0]    : upg_wen_i),
-        .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
-        .dina     (kickOff ?    ram_dat_i[7:0]: upg_dat_i[7:0]),
+        .clka     (ram_clk),
+        .wea      (ram_wen[0]),
+        .addra    (ram_adr_i[15:2]),
+        .dina     (ram_dat_i[7:0]),
         .douta    (ram_data0)
     );
     ram1 ram1 (
-        .clka     (kickOff ?    ram_clk      : upg_clk_i),
-        .wea      (kickOff ?    ram_wen[1]    : upg_wen_i),
-        .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
-        .dina     (kickOff ?    ram_dat_i[15:8]: upg_dat_i[15:8]),
+        .clka     (ram_clk),
+        .wea      (ram_wen[1]),
+        .addra    (ram_adr_i[15:2]),
+        .dina     (ram_dat_i[15:8]),
         .douta    (ram_data1)
     );
     ram2 ram2 (
-        .clka     (kickOff ?    ram_clk      : upg_clk_i),
-        .wea      (kickOff ?    ram_wen[2]    : upg_wen_i),
-        .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
-        .dina     (kickOff ?    ram_dat_i[23:16]: upg_dat_i[23:16]),
+        .clka     (ram_clk),
+        .wea      (ram_wen[2]),
+        .addra    (ram_adr_i[15:2]),
+        .dina     (ram_dat_i[23:16]),
         .douta    (ram_data2)
     );
     ram3 ram3 (
-        .clka     (kickOff ?    ram_clk      : upg_clk_i),
-        .wea      (kickOff ?    ram_wen[3]    : upg_wen_i),
-        .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
-        .dina     (kickOff ?    ram_dat_i[31:24]: upg_dat_i[31:24]),
+        .clka     (ram_clk),
+        .wea      (ram_wen[3]),
+        .addra    (ram_adr_i[15:2]),
+        .dina     (ram_dat_i[31:24]),
         .douta    (ram_data3)
-    );  
+    );    
+//    ram0 ram0 (
+//        .clka     (kickOff ?    ram_clk      : upg_clk_i),
+//        .wea      (kickOff ?    ram_wen[0]    : upg_wen_i),
+//        .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
+//        .dina     (kickOff ?    ram_dat_i[7:0]: upg_dat_i[7:0]),
+//        .douta    (ram_data0)
+//    );
+//    ram1 ram1 (
+//        .clka     (kickOff ?    ram_clk      : upg_clk_i),
+//        .wea      (kickOff ?    ram_wen[1]    : upg_wen_i),
+//        .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
+//        .dina     (kickOff ?    ram_dat_i[15:8]: upg_dat_i[15:8]),
+//        .douta    (ram_data1)
+//    );
+//    ram2 ram2 (
+//        .clka     (kickOff ?    ram_clk      : upg_clk_i),
+//        .wea      (kickOff ?    ram_wen[2]    : upg_wen_i),
+//        .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
+//        .dina     (kickOff ?    ram_dat_i[23:16]: upg_dat_i[23:16]),
+//        .douta    (ram_data2)
+//    );
+//    ram3 ram3 (
+//        .clka     (kickOff ?    ram_clk      : upg_clk_i),
+//        .wea      (kickOff ?    ram_wen[3]    : upg_wen_i),
+//        .addra    (kickOff ?    ram_adr_i[15:2]: upg_adr_i),
+//        .dina     (kickOff ?    ram_dat_i[31:24]: upg_dat_i[31:24]),
+//        .douta    (ram_data3)
+//    );  
     
     always @(*) begin
         case(ram_dat_width)

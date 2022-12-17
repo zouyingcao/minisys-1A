@@ -1,10 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 module Ifetc32 (
-    // for multicycle
-    input   [1:0]   Wpc,
-    input           Wir,
-    //
 	input			reset,				// 复位信号(高电平有效)
 	input           PCWrite,
     input			clock,				// 时钟(22MHz)
@@ -26,7 +22,10 @@ module Ifetc32 (
 	input	[31:0]	Jpadr,				// 从程序ROM单元中获取的指令
 	// 中断相关
 	input   [31:0]  interrupt_PC,
-	input           cp0_wen
+	input           backFromEret,
+	input           cp0_wen,
+	
+	output reg     IF_backFromEret
 );
     
     wire [31:0] PC_plus_4;
@@ -42,17 +41,18 @@ module Ifetc32 (
     
     // next_PC是右移2位后的PC，从而保证强制对齐
     always @* begin               
-        if(nBranch) next_PC = ID_opcplus4;          // ID段分支预测失败，有条件跳转指令不跳转
+        if(cp0_wen) next_PC = interrupt_PC>>2; // 先右移两位
+        else if(nBranch) next_PC = ID_opcplus4;          // ID段分支预测失败，有条件跳转指令不跳转
         else if(JR) next_PC = Read_data_1;          // jr,jalr: PC←(rs),ID段传入
         else if(J)                                  // j,jal
             next_PC = {6'b0000,Jump_PC};            // (Zero-Extend)address<<2，先左移再零扩展,右移两位的结果
         else if(IFBranch)                           // IF段预测跳转条件成立
             next_PC = {2'b00,PC_plus_4[31:2]}+{{16{sign}},offset}; // (PC)←(PC)+4+((Sign-Extend)offset<<2),右移两位的结果
-        else if(cp0_wen) next_PC = interrupt_PC>>2; // 先右移两位
         else next_PC = {2'b00,PC_plus_4[31:2]};     // 一般情况
     end
     
     always @(negedge clock) begin                   // 时钟下降沿更改PC
+        IF_backFromEret=backFromEret;
         if(reset) PC = 32'h00000000;
         else if(PCWrite)PC = next_PC<<2;            // 确保是4的倍数
     end 

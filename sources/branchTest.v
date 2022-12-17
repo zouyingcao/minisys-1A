@@ -23,7 +23,6 @@
 
 module branchTest(
     input   [5:0]   IF_op,
-    input           clock,
     // 有条件跳转 ID段传入
     input           Beq,
     input           Bne,
@@ -42,11 +41,13 @@ module branchTest(
     input           ALUSrc,
     input   [1:0]   ALUSrcC,
     input   [1:0]   ALUSrcD,
+    input           MEM_iomemRead,
     input	[31:0]	read_data_1,//register[rs]
     input	[31:0]	read_data_2,//register[rt]
     input	[31:0]	Sign_extend,
     input   [31:0]  EX_ALU_result,
     input   [31:0]  MEM_ALU_result,  
+    input   [31:0]  memIOData,
     input   [31:0]  WB_data,
     
     output          nBranch,
@@ -60,9 +61,9 @@ module branchTest(
     
     wire [31:0] rt;
     assign rs = (ALUSrcC==2'b00) ? read_data_1 : (ALUSrcC==2'b01) ? 
-    EX_ALU_result : (ALUSrcC==2'b10) ? MEM_ALU_result : WB_data;
+    EX_ALU_result : (ALUSrcC==2'b10) ? ((MEM_iomemRead==1'b1)? memIOData:MEM_ALU_result) : WB_data;
     assign rt = (ALUSrc==1) ? Sign_extend: (ALUSrcD==2'b00) ? read_data_2 : 
-    (ALUSrcD==2'b01) ? EX_ALU_result: (ALUSrcD==2'b10) ? MEM_ALU_result : WB_data;
+    (ALUSrcD==2'b01) ? EX_ALU_result: (ALUSrcD==2'b10) ? ((MEM_iomemRead==1'b1)? memIOData:MEM_ALU_result) : WB_data;
     
     wire Zero,Negative,Positive;
     assign Zero = rs==rt;

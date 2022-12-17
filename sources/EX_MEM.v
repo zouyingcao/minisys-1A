@@ -27,7 +27,8 @@ module EX_MEM(
     input EX_Zero,
     input EX_Positive,
     input EX_Negative,
-    input [4:0] EX_rd,
+    input EX_backFromEret,
+    input [31:0] EX_rd,
     input [31:0] EX_rt_value,
     
     input EX_Jr,
@@ -54,7 +55,6 @@ module EX_MEM(
     
     input EX_Divide_zero,
     input EX_Overflow,
-    input ID_EX_Overflow,
     input ID_EX_Mfc0,
     input ID_EX_Mtc0,
     input ID_EX_Syscall,
@@ -77,7 +77,8 @@ module EX_MEM(
     output reg MEM_WB_Zero,
     output reg MEM_WB_Positive,
     output reg MEM_WB_Negative,
-    output reg[4:0] MEM_WB_rd,
+    output reg MEM_backFromEret,
+    output reg[31:0] MEM_WB_rd,
     
     output reg MEM_WB_Jr,
     output reg MEM_WB_Jalr,
@@ -124,11 +125,12 @@ module EX_MEM(
     output reg[4:0]  MEM_WB_Waddr
     );
     always @(negedge clock or posedge reset or posedge flush) begin
+        MEM_backFromEret = EX_backFromEret;
+        MEM_WB_rd = EX_rd;
         if(reset||flush)begin
             MEM_WB_Zero = 1'd0;
             MEM_WB_Positive = 1'd0;
             MEM_WB_Negative = 1'd0;
-            MEM_WB_rd = 5'd0;
             
             MEM_WB_Jr = 1'd0;
             MEM_WB_Jalr = 1'd0;
@@ -176,7 +178,7 @@ module EX_MEM(
             MEM_WB_Zero = EX_Zero;
             MEM_WB_Positive = EX_Positive;
             MEM_WB_Negative = EX_Negative;
-            MEM_WB_rd = EX_rd;
+            //MEM_WB_rd = EX_rd;
             
             MEM_WB_Jr = EX_Jr;
             MEM_WB_Jalr = ID_EX_Jalr;
