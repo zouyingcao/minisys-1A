@@ -50,7 +50,7 @@ module keyboard(
                         state = 3'b001;
                 end
                 3'b001:begin // 去抖处理
-                    if(count != 1000) // 20ms：1000
+                    if(count != 16'd1000) // 20ms：1000
                         count = count + 16'd1;
                     else if(column == 4'b1111) begin  //如果这时候行线全为1 说明抖动了 回到初始状态
                         state = 3'b000;
@@ -65,7 +65,7 @@ module keyboard(
                         row = 4'b1101;
                         state = 3'b011;
                     end else begin
-                        state = 3'b000;
+                        //state = 3'b000;
                         value[3:0] = row;
                         value[7:4] = column;
                         if(column == 4'b1110)
@@ -83,7 +83,7 @@ module keyboard(
                         row = 4'b1011;
                         state = 3'b100;
                     end else begin
-                        state = 3'b000;
+                        //state = 3'b000;
                         value[3:0] = row;
                         value[7:4] = column;
                         if(column == 4'b1110)
@@ -101,7 +101,7 @@ module keyboard(
                         row = 4'b0111;
                         state = 3'b101;
                     end else begin
-                        state = 3'b000;
+                        //state = 3'b000;
                         value[3:0] = row;
                         value[7:4] = column;
                         if(column == 4'b1110)
@@ -119,7 +119,7 @@ module keyboard(
                         row = 4'b0000;
                         state = 3'b000;
                     end else begin
-                        state = 3'b000;
+                        //state = 3'b000;
                         value[3:0] = row;
                         value[7:4] = column;
                         if(column == 4'b1110)
@@ -138,7 +138,7 @@ module keyboard(
      always @(*)begin
         if (read_enable == 1)
         case (address)
-            3'b000: read_data_output = {12'b0,value[11:8]}; // {4'd0,value,行,列},键值寄存器(0FFFFFC10H)
+            3'b000: read_data_output = {12'd0,value[11:8]}; // {4'd0,value,行,列},键值寄存器(0FFFFFC10H)
             3'b010: // 状态寄存器(0XFFFFFC12)
                 read_data_output = (state > 3'd1) ? 16'd1:16'd0;
         endcase
