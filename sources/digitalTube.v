@@ -70,6 +70,7 @@ module digitalTube(
         if (reset == 1) begin
             value = 8'hff;
             enable = 8'hff;
+            choose = 8'b00000001;
         end else begin
             if(choose==8'b10000000)
                 choose=8'b00000001;

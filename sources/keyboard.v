@@ -138,7 +138,7 @@ module keyboard(
      always @(*)begin
         if (read_enable == 1)
         case (address)
-            3'b000: read_data_output = {12'd0,value[11:8]}; // {4'd0,value,ÐÐ,ÁÐ},¼üÖµ¼Ä´æÆ÷(0FFFFFC10H)
+            3'b000: read_data_output = {4'd0,value[11:0]};//{12'd0,value[11:8]}; // {4'd0,value,ÐÐ,ÁÐ},¼üÖµ¼Ä´æÆ÷(0FFFFFC10H)
             3'b010: // ×´Ì¬¼Ä´æÆ÷(0XFFFFFC12)
                 read_data_output = (state > 3'd1) ? 16'd1:16'd0;
         endcase

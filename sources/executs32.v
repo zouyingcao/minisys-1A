@@ -131,8 +131,6 @@ module Executs32 (
     assign div = (Op==6'b000000&&Func==6'b011010);
     assign divu = (Op==6'b000000&&Func==6'b011011);
     
-    wire [63:0] test1=Ainput*Binput;
-    wire [63:0] test2=s_Ainput*s_Binput;
     wire [31:0] test31=Ainput/Binput;
     wire [31:0] test32=Ainput%Binput;
     wire [31:0] test41=s_Ainput/s_Binput;

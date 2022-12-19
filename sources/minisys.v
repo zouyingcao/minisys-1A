@@ -14,7 +14,6 @@ module minisys (
     output  [7:0]   digitalTube,        // 8位7段数码管控制器
     output  [7:0]   digitalTubeEnable,  // 数码管使能信号A0-A7(低电平有效)
     output          pwmOut,             // PWM控制器
-    output          wdtOut,             // 看门狗
     output          buzzerOut          // 蜂鸣管
 	// UART Programmer Pinouts
 //	input           start_pg,           // 接板上的S3按键做下载启动键
@@ -41,15 +40,17 @@ module minisys (
 //    end
     
     wire rst;
+    wire wdtOut;             // 看门狗:四个连续的reset
     //assign rst = fpga_rst | !upg_rst;
+    //assign rst = fpga_rst || wdtOut;
     assign rst = fpga_rst;
-
+    
     cpuclk cpuclk (
         .clk_in1         (fpga_clk),    // 100MHz, 板上时钟
         .clk_out1        (cpu_clk),     // CPU Clock (22MHz), 主时钟
         .clk_out2        (upg_clk)      // UPG Clock (10MHz), 用于串口下载
     );
-        
+ 
 //    uart_bmpg_0 uartpg (                // 此模块已经接好，只作为串口下载的附件，可不去关注
 //        .upg_clk_i        (upg_clk),    // 10MHz   
 //        .upg_rst_i        (upg_rst),    // 高电平有效
@@ -172,11 +173,11 @@ module minisys (
 //		.upg_done_i		(upg_done_o)		         // 1 if programming is finished
     );  
     
-    interrupt INTRPT(
-        .button         (button_interrupt),     // 除S3外的四个按钮开关（S1-S5)
-        .keyboardIn     (keyboard_interrupt),  // 键盘中断
-        .interrupt      (interrupt)
-    );
+//    interrupt INTRPT(
+//        .button         (button_interrupt),     // 除S3外的四个按钮开关（S1-S5)
+//        .keyboardIn     (keyboard_interrupt),  // 键盘中断
+//        .interrupt      (interrupt)
+//    );
     
     // interface
     leds led24(
