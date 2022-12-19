@@ -120,7 +120,7 @@ module cpu(
      wire [31:0] add_result;                 // PC+4+offset<<2
      wire [31:0] ex_mem_rd_value;         // (rd)
      wire [31:0] alu_result;                 // ALU运算结果
-     wire zero,positive,negative,overflow,div_zero;
+     wire zero,positive,negative,overflow,div_zero,ex_stall;
        
      // EX_MEM输出
      wire mem_backFromEret;
@@ -156,6 +156,7 @@ module cpu(
      // 取指单元
      Ifetc32 ifetch(
               .reset          (reset),
+              .ex_stall       (ex_stall),
               .clock          (clock),     
               .PCWrite        (pcwrite),
               
@@ -222,6 +223,7 @@ module cpu(
           IF_ID IF_ID(
              .cpu_clk         (clock),
              .reset           (reset),  
+             .ex_stall        (ex_stall),
              .PCWrite         (pcwrite),
              .flush           (if_flush||cp0_wen),
              .backFromEret    (if_backFromEret),
@@ -326,6 +328,7 @@ module cpu(
           // rtd,A,B,NPC,E,cmd 
           ID_EX ID_EX(
               .cpu_clk        (clock),
+              .ex_stall       (ex_stall),
               .flush          (cp0_wen),////
               .reset          (reset),
               .stall          (id_ex_stall),
@@ -481,6 +484,7 @@ module cpu(
           );
       
           Executs32 execute(
+              .clock          (clock), 
               .PC_plus_4      (wb_opcplus4),////????
               .Read_data_1    (ex_dataA),
               .Read_data_2    (ex_dataB),
@@ -512,6 +516,8 @@ module cpu(
               .Mthi           (ex_mem_mthi),
               .Mtlo           (ex_mem_mtlo),
               
+              .ex_stall       (ex_stall),
+              
               .Zero           (zero),
               .Positive       (positive),
               .Negative       (negative),
@@ -529,6 +535,7 @@ module cpu(
           EX_MEM EX_MEM(
               .reset          (reset),
               .flush          (cp0_wen),
+              .ex_stall       (ex_stall),
               .clock          (clock),
               
               .EX_Zero        (zero),

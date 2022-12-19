@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module Executs32 (
+    input           clock,
     input   [31:0]  PC_plus_4,          // PC+4
     input	[31:0]	Read_data_1,		// 从译码单元的Read_data_1中来
     input	[31:0]	Read_data_2,		// 从译码单元的Read_data_2中来
@@ -36,6 +37,8 @@ module Executs32 (
     input   [31:0]  WB_data,            // 只与前前条指令存在冒险
     
     output   [31:0] rd_value,           
+    
+    output   reg   ex_stall,           // 用于乘除法 暂停流水线
     
     output			Zero,				// 为1表明计算值为0 
     output          Positive,           // rs是否为正
@@ -131,22 +134,27 @@ module Executs32 (
     assign div = (Op==6'b000000&&Func==6'b011010);
     assign divu = (Op==6'b000000&&Func==6'b011011);
     
-    wire [31:0] test31=Ainput/Binput;
-    wire [31:0] test32=Ainput%Binput;
-    wire [31:0] test41=s_Ainput/s_Binput;
-    wire [31:0] test42=s_Ainput%s_Binput;
     
     // 有符号乘法
-    assign mul_signed_result=s_Ainput*s_Binput;
+    assign mul_signed_result = s_Ainput * s_Binput;
+//    mult_signed mul_signed(
+//        .CLK(clock),
+//        .A(Ainput),
+//        .B(Binput),
+//        .P(mul_signed_result)
+//    );
+    
     // 无符号乘法
-    assign mul_unsigned_result=Ainput*Binput;
+    assign mul_unsigned_result = Ainput * Binput;
     
     // 有符号除法
     div_signed div_signed(
-        //.aclk(clock),                                  // 上升沿              
+        .aclk(clock),                                  // 上升沿              
         .s_axis_divisor_tvalid(DivSel),                // 除数tvalid
+        .s_axis_divisor_tready(),
         .s_axis_divisor_tdata(Binput),                 
         .s_axis_dividend_tvalid(DivSel),               // 被除数tvalid
+        .s_axis_dividend_tready(),
         .s_axis_dividend_tdata(Ainput),                
         .m_axis_dout_tvalid(div_dout_tvalid),          // 产生结果时tvalid变1
         .m_axis_dout_tuser(div_zero),                  // 除零
@@ -155,15 +163,32 @@ module Executs32 (
     
     // 无符号除法
     div_unsigned div_unsigned(
-        //.aclk(clock),                                  
+        .aclk(clock),                                  
         .s_axis_divisor_tvalid(DivSel),                 // 除数tvalid
+        .s_axis_divisor_tready(),
         .s_axis_divisor_tdata(Binput),                 
         .s_axis_dividend_tvalid(DivSel),                // 被除数tvalid
+        .s_axis_dividend_tready(),
         .s_axis_dividend_tdata(Ainput),                
         .m_axis_dout_tvalid(divu_dout_tvalid),          // 产生结果时tvalid变1
         .m_axis_dout_tuser(divu_zero),                  // 除零
         .m_axis_dout_tdata(div_unsigned_result)         // (32{商},32{余数})
     );
+    
+    initial begin
+        ex_stall=1'b0;
+    end
+    
+    reg[5:0] div_stall;
+    always @(posedge clock) begin 
+        if(DivSel) begin
+            div_stall = div_stall-6'd1;
+            if(div_stall>0)ex_stall=1'b1;
+            else ex_stall=1'b0;
+        end
+        else
+            div_stall = 6'd37;
+    end
     
     always @(*) begin  // 乘除运算/mt赋值结果写入HI/LO
          if(Mthi)   hi = Ainput;//(rs)

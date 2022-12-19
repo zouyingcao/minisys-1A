@@ -3,6 +3,7 @@
 module Ifetc32 (
 	input			reset,				// 复位信号(高电平有效)
 	input           PCWrite,
+	input           ex_stall,           // pc保持不变
     input			clock,				// 时钟(22MHz)
 
     input   [25:0]  Jump_PC,            // 来自ID，指令中的address部分
@@ -54,6 +55,6 @@ module Ifetc32 (
     always @(negedge clock) begin                   // 时钟下降沿更改PC
         IF_backFromEret=backFromEret;
         if(reset) PC = 32'h00000000;
-        else if(PCWrite)PC = next_PC<<2;            // 确保是4的倍数
+        else if(PCWrite&&ex_stall!=1'b1)PC = next_PC<<2;            // 确保是4的倍数
     end 
 endmodule

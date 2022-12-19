@@ -25,6 +25,7 @@ module ID_EX(
     input reset,
     input flush,
     input stall,
+    input ex_stall,
     input ID_backFromEret,
     input [31:0] ID_opcplus4,
     input [31:0] IF_ID_PC,
@@ -252,7 +253,7 @@ module ID_EX(
             EX_MEM_Syscall = 1'd0;
             EX_MEM_Eret = 1'd0;
             EX_MEM_Reserved_instruction = 1'd0;
-        end else begin
+        end else if(ex_stall!=1'b1) begin
             EX_MEM_opcplus4 = ID_opcplus4;
             EX_MEM_PC = IF_ID_PC;
             EX_dataA = ID_dataA;

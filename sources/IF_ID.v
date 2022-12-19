@@ -25,6 +25,7 @@ module IF_ID(
     input reset,
     input flush,                      // IF/ID寄存器清空信号
     input PCWrite,
+    input ex_stall,                   // 取指阶段是否暂停
     input backFromEret,               // 从中断返回
     output reg ID_backFromEret,
     input [31:0] IF_PC,               
@@ -45,7 +46,7 @@ module IF_ID(
             ID_EX_PC = 32'd0;
             ID_instruction = 32'd0;
             ID_opcplus4 = 32'd0;
-        end else if(PCWrite) begin
+        end else if(PCWrite&&ex_stall!=1'b1) begin
             ID_EX_PC = IF_PC;
             ID_instruction = IF_instruction;
             ID_opcplus4 = IF_opcplus4;

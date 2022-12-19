@@ -23,6 +23,7 @@
 module EX_MEM(
     input reset,
     input flush,
+    input ex_stall,
     input clock,
     input EX_Zero,
     input EX_Positive,
@@ -174,7 +175,7 @@ module EX_MEM(
             MEM_ALU_Result = 32'd0;
             MEM_Data_In = 32'd0;
             MEM_WB_Waddr = 5'd0;
-        end else begin
+        end else if(ex_stall!=1'b1) begin
             MEM_WB_Zero = EX_Zero;
             MEM_WB_Positive = EX_Positive;
             MEM_WB_Negative = EX_Negative;
