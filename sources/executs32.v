@@ -137,12 +137,6 @@ module Executs32 (
     
     // 有符号乘法
     assign mul_signed_result = s_Ainput * s_Binput;
-//    mult_signed mul_signed(
-//        .CLK(clock),
-//        .A(Ainput),
-//        .B(Binput),
-//        .P(mul_signed_result)
-//    );
     
     // 无符号乘法
     assign mul_unsigned_result = Ainput * Binput;
@@ -151,10 +145,10 @@ module Executs32 (
     div_signed div_signed(
         .aclk(clock),                                  // 上升沿              
         .s_axis_divisor_tvalid(DivSel),                // 除数tvalid
-        .s_axis_divisor_tready(),
+        //.s_axis_divisor_tready(),
         .s_axis_divisor_tdata(Binput),                 
         .s_axis_dividend_tvalid(DivSel),               // 被除数tvalid
-        .s_axis_dividend_tready(),
+        //.s_axis_dividend_tready(),
         .s_axis_dividend_tdata(Ainput),                
         .m_axis_dout_tvalid(div_dout_tvalid),          // 产生结果时tvalid变1
         .m_axis_dout_tuser(div_zero),                  // 除零
@@ -165,10 +159,10 @@ module Executs32 (
     div_unsigned div_unsigned(
         .aclk(clock),                                  
         .s_axis_divisor_tvalid(DivSel),                 // 除数tvalid
-        .s_axis_divisor_tready(),
+        //.s_axis_divisor_tready(),
         .s_axis_divisor_tdata(Binput),                 
         .s_axis_dividend_tvalid(DivSel),                // 被除数tvalid
-        .s_axis_dividend_tready(),
+        //.s_axis_dividend_tready(),
         .s_axis_dividend_tdata(Ainput),                
         .m_axis_dout_tvalid(divu_dout_tvalid),          // 产生结果时tvalid变1
         .m_axis_dout_tuser(divu_zero),                  // 除零
@@ -180,30 +174,40 @@ module Executs32 (
     end
     
     reg[5:0] div_stall;
+    reg[5:0] divu_stall;
     always @(posedge clock) begin 
-        if(DivSel) begin
+        if(div) begin
             div_stall = div_stall-6'd1;
             if(div_stall>0)ex_stall=1'b1;
             else ex_stall=1'b0;
         end
-        else
+        else begin
             div_stall = 6'd37;
+        end
+        if(divu) begin
+            divu_stall = divu_stall-6'd1;
+            if(divu_stall>0)ex_stall=1'b1;
+            else ex_stall=1'b0;
+        end
+        else begin
+            divu_stall = 6'd35;
+        end
     end
     
-    always @(*) begin  // 乘除运算/mt赋值结果写入HI/LO
-         if(Mthi)   hi = Ainput;//(rs)
-         else if(Mtlo)  lo = Ainput;
+    always @(posedge clock) begin  // 乘除运算/mt赋值结果写入HI/LO
+         if(Mthi)   hi <= Ainput;//(rs)
+         else if(Mtlo)  lo <= Ainput;
          else if(mult)  {hi,lo} <= mul_signed_result;
          else if(multu) {hi,lo} <= mul_unsigned_result;
          else if(DivSel) begin
             if(div) begin 
                 if(div_dout_tvalid)
                     {lo,hi} <= div_signed_result;
-                Divide_zero = div_zero;
+                Divide_zero <= div_zero;
             end else if(divu) begin
                 if(divu_dout_tvalid)
                     {lo,hi} <= div_unsigned_result;
-                Divide_zero = divu_zero;
+                Divide_zero <= divu_zero;
             end
          end
     end

@@ -66,8 +66,10 @@ module Idecode32 (
     integer i;
     always @(posedge clock) begin       // 本进程写目标寄存器
         if(reset==1) begin              // 初始化寄存器组
-            for(i=0;i<32;i=i+1) register[i] <= i;
-            register[29] = 32'h7FFF;//堆栈指针 内存最大位置
+            for(i=0;i<32;i=i+1) begin 
+                if(i==29) register[29] = 32'h7FFF;//堆栈指针 内存最大位置
+                else register[i] = i;
+            end
         end else if(RegWrite==1) begin  // 注意寄存器0恒等于0
             if(write_register_address != 5'b00000)
                 register[write_register_address] = write_data;

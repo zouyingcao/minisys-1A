@@ -72,39 +72,39 @@ module control32 (
     assign func = Instruction[5:0]; 
     
     //R型指令:
-    assign R_format = (op===6'b000000||op===6'b010000);        //R型指令(mfc0,mtc0,eret为op==6'b010000)
-    assign Jrn = (op===6'b000000 && rt===5'b00000 && rd===5'b00000 && shamt===5'b00000 && func===6'b001000);
-    assign Jalr = (op===6'b000000 && rt===5'b00000 && shamt===5'b00000 && func===6'b001001);
+    assign R_format = (op==6'b000000||op==6'b010000);        //R型指令(mfc0,mtc0,eret为op==6'b010000)
+    assign Jrn = (op==6'b000000 && rt==5'b00000 && rd==5'b00000 && shamt==5'b00000 && func==6'b001000);
+    assign Jalr = (op==6'b000000 && rt==5'b00000 && shamt==5'b00000 && func==6'b001001);
     
-    assign Mfhi = (op===6'b000000 && rs===5'b00000 && rt===5'b00000 && shamt===5'b00000 && func===6'b010000);
-    assign Mflo = (op===6'b000000 && rs===5'b00000 && rt===5'b00000 && shamt===5'b00000 && func===6'b010010);
-    assign Mthi = (op===6'b000000 && rt===5'b00000 && rd===5'b00000 && shamt===5'b00000 && func===6'b010001);
-    assign Mtlo = (op===6'b000000 && rt===5'b00000 && rd===5'b00000 && shamt===5'b00000 && func===6'b010011);
-    assign Mfc0 = (op===6'b010000 && rs===5'b00000 && shamt===5'b00000 && func[5:3]===3'b000);
-    assign Mtc0 = (op===6'b010000 && rs===5'b00100 && shamt===5'b00000 && func[5:3]===3'b000);
+    assign Mfhi = (op==6'b000000 && rs==5'b00000 && rt==5'b00000 && shamt==5'b00000 && func==6'b010000);
+    assign Mflo = (op==6'b000000 && rs==5'b00000 && rt==5'b00000 && shamt==5'b00000 && func==6'b010010);
+    assign Mthi = (op==6'b000000 && rt==5'b00000 && rd==5'b00000 && shamt==5'b00000 && func==6'b010001);
+    assign Mtlo = (op==6'b000000 && rt==5'b00000 && rd==5'b00000 && shamt==5'b00000 && func==6'b010011);
+    assign Mfc0 = (op==6'b010000 && rs==5'b00000 && shamt==5'b00000 && func[5:3]==3'b000);
+    assign Mtc0 = (op==6'b010000 && rs==5'b00100 && shamt==5'b00000 && func[5:3]==3'b000);
     
-    assign Break = (op===6'b000000 && func===6'b001101);
-    assign Syscall = (op===6'b000000 && func===6'b001100);
-    assign Eret = (Instruction===32'b010000_10000000000000000000_011000);//从中断或者异常中返回
+    assign Break = (op==6'b000000 && func==6'b001101);
+    assign Syscall = (op==6'b000000 && func==6'b001100);
+    assign Eret = (Instruction==32'b010000_10000000000000000000_011000);//从中断或者异常中返回
     
     //I型指令:I_format+Branch+nBranch+Lw+Sw
-    assign I_format = (op[5:3] === 3'b001);   //001xxx的I型指令
-    assign L_format = (op[5:3] === 3'b100);   //从存储器中读数据
-    assign S_format = (op[5:2] === 4'b1010);  //写存储器
+    assign I_format = (op[5:3] == 3'b001);   //001xxx的I型指令
+    assign L_format = (op[5:3] == 3'b100);   //从存储器中读数据
+    assign S_format = (op[5:2] == 4'b1010);  //写存储器
     
-    assign Beq = (op===6'b000100);            //beq指令
-    assign Bne = (op===6'b000101);            //bne指令
-    assign Bgez = (op===6'b000001&&rt===5'b00001);
-    assign Bgtz = (op===6'b000111&&rt===5'b00000);
-    assign Blez = (op===6'b000110&&rt===5'b00000);
-    assign Bltz = (op===6'b000001&&rt===5'b00000);
-    assign Bgezal = (op===6'b000001&&rt===5'b10001);
-    assign Bltzal = (op===6'b000001&&rt===5'b10000);
+    assign Beq = (op==6'b000100);            //beq指令
+    assign Bne = (op==6'b000101);            //bne指令
+    assign Bgez = (op==6'b000001&&rt==5'b00001);
+    assign Bgtz = (op==6'b000111&&rt==5'b00000);
+    assign Blez = (op==6'b000110&&rt==5'b00000);
+    assign Bltz = (op==6'b000001&&rt==5'b00000);
+    assign Bgezal = (op==6'b000001&&rt==5'b10001);
+    assign Bltzal = (op==6'b000001&&rt==5'b10000);
     //assign Branch = Beq||Bne||Bgez||Bgtz||Blez||Bltz||Bgezal||Bltzal;
    
     //J型指令
-    assign Jmp = (op===6'b000010)? 1'b1:1'b0;            //j指令
-    assign Jal = (op===6'b000011)? 1'b1:1'b0;            //jal指令
+    assign Jmp = (op==6'b000010)? 1'b1:1'b0;            //j指令
+    assign Jal = (op==6'b000011)? 1'b1:1'b0;            //jal指令
 
     assign MemRead = l_format&&(Alu_resultHigh!=22'b1111111111111111111111);    
     assign IORead = l_format&&(Alu_resultHigh===22'b1111111111111111111111);     
@@ -112,26 +112,26 @@ module control32 (
     assign IOWrite = s_format&&(Alu_resultHigh===22'b1111111111111111111111);   
     assign MemIOtoReg = l_format;
     
-    assign Sftmd = (op===6'b000000&&(func[5:2]===4'b0001&&shamt===5'b00000||func[5:2]===4'b0000&&rs===5'b00000));//sll,srl,sra,sllv,srlv,srav
-    assign DivSel = (op===6'b000000&&func[5:1]===5'b01101);
+    assign Sftmd = (op==6'b000000&&(func[5:2]==4'b0001&&shamt==5'b00000||func[5:2]==4'b0000&&rs==5'b00000));//sll,srl,sra,sllv,srlv,srav
+    assign DivSel = (op==6'b000000&&func[5:1]==5'b01101);
     assign ALUSrc = I_format||L_format||S_format;
     assign ALUOp = {(R_format || I_format),(Beq || Bne || Bgez || Bgtz || Blez ||Bltz || Bgezal || Bltzal)};  // 是R－type或需要立即数作32位扩展的指令1位为1,beq、bne指令则0位为1
     assign Memory_sign = !op[2];
     assign Memory_data_width = op[1:0];
     
     wire valueLogicR,mulAndDiv,Rcmp,R31,valueLogicI,L5,S3,I24,J2;
-    assign valueLogicR = (op===6'b000000&&shamt===5'b00000&&func[5:3]===3'b100);//add,addu,sub,subu,and,or,xor,nor
-    assign mulAndDiv = (op===6'b000000&&rd===5'b00000&&shamt===5'b00000&&func[5:2]===4'b0110);//mult,multu,div,divu
-    assign Rcmp = (op===6'b000000&&shamt===5'b00000&&func[5:1]===5'b10101);//slt,sltu
+    assign valueLogicR = (op==6'b000000&&shamt==5'b00000&&func[5:3]==3'b100);//add,addu,sub,subu,and,or,xor,nor
+    assign mulAndDiv = (op==6'b000000&&rd==5'b00000&&shamt==5'b00000&&func[5:2]==4'b0110);//mult,multu,div,divu
+    assign Rcmp = (op==6'b000000&&shamt==5'b00000&&func[5:1]==5'b10101);//slt,sltu
     assign R31 = valueLogicR||mulAndDiv||Mfhi||Mflo||Mthi||Mtlo||Mfc0||Mtc0||Sftmd||Jrn||Jalr||Break||Syscall||Eret||Rcmp;
-    assign valueLogicI = (I_format&&((op===6'b001111)?(rs==5'b00000):1'b1));//addi,addiu,andi,ori,xori,lui,slti,sltiu
-    assign L5 = (L_format&&(!(op[2:0]===3'b111||op[2:0]===3'b110||op[2:0]===3'b010)));//lb,lbu,lh,lhu,lw
+    assign valueLogicI = (I_format&&((op==6'b001111)?(rs==5'b00000):1'b1));//addi,addiu,andi,ori,xori,lui,slti,sltiu
+    assign L5 = (L_format&&(!(op[2:0]==3'b111||op[2:0]==3'b110||op[2:0]==3'b010)));//lb,lbu,lh,lhu,lw
     assign S3 = (S_format&&op[1:0]!=2'b10);//sb,sh,sw
     assign I24 = valueLogicI||L5||S3||Beq||Bne||Bgez||Bgtz||Blez||Bltz||Bgezal||Bltzal;
     assign J2 = Jmp||Jal;
     assign Reserved_instruction = !(R31||I24||J2);//保留指令（未实现的指令）异常
 
-    assign RegWrite = R_format? (func[5:3]===3'b100||func[5:1]===5'b10101||Mfhi||Mflo||Mfc0||Sftmd||Jalr):
+    assign RegWrite = R_format? (func[5:3]==3'b100||func[5:1]==5'b10101||Mfhi||Mflo||Mfc0||Sftmd||Jalr):
                                 (I_format||L_format||Bgezal||Bltzal||Jal);
     assign RegDST = Mfc0 ? 0:R_format;    // 只有R指令除去Mfc0时为rd   
 
