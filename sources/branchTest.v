@@ -23,6 +23,7 @@
 
 module branchTest(
     input   [5:0]   IF_op,
+    input           PCWrite,
     // 有条件跳转 ID段传入
     input           Beq,
     input           Bne,
@@ -71,10 +72,10 @@ module branchTest(
     assign Positive = (rs[31]==1'b0&&rs!=32'd0);
 
     // 有条件跳转,条件不成立时
-    assign nBranch = (Beq&&!Zero)||(Bne&&Zero)||
+    assign nBranch = ((Beq&&!Zero)||(Bne&&Zero)||
             (Bgez&&Negative)||(Bgtz&&!Positive)||
             (Blez&&Positive)||(Bltz&&!Negative)||
-            (Bgezal&&Negative)||(Bltzal&&!Negative); // (PC)←(PC)+4+((Sign-Extend)offset<<2)
+            (Bgezal&&Negative)||(Bltzal&&!Negative))&&PCWrite; // (PC)←(PC)+4+((Sign-Extend)offset<<2)
     
     assign JR = Jalr||Jrn;
     assign J = Jmp||Jal;

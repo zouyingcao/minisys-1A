@@ -46,7 +46,8 @@ module cpu(
     output wire wdtctrl,             // 看门狗
     output wire pwmctrl,             // PWM脉冲宽度调制
     
-    input [5:0] interrupt       // 外部中断信号 共六根
+    input [5:0] interrupt,       // 外部中断信号 共六根
+    input mem_error
     );
      // IF段输出
      wire [31:0] instruction;            // 取出的指令
@@ -184,6 +185,7 @@ module cpu(
           
           branchTest branchTest(
               .IF_op          (rom_instruction[31:26]), // 从而与ifetch同步
+              .PCWrite        (pcwrite),////////////new add
               //有条件跳转 ID段
               .Beq            (beq),
               .Bne            (bne),
@@ -744,6 +746,7 @@ module cpu(
              .Eret            (wb_eret),
              .ExternalInterrupt(interrupt),
              .backFromEret    (wb_backFromEret),
+             .memError        (mem_error),
              
              .PC              (wb_pc),
              .rt_value        (cp0_rt_value),
