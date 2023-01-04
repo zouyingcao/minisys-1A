@@ -47,7 +47,6 @@ module ram_sim(
       #100 begin ram_dat_width=2'b1; ram_adr_i=16'h0010; end
       #100 begin ram_wen_i=1'b1; ram_dat_width=2'b0; ram_sign=1'b1; ram_adr_i=16'h0010; ram_dat_i=32'h00000007; end
       #100 begin ram_wen_i=1'b0; ram_dat_width=2'd3; ram_adr_i=16'h0010; end
-
     end
     always #50 ram_clk_i = ~ram_clk_i;            
 endmodule
